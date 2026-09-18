@@ -1094,7 +1094,7 @@ body{
 <div class="vault-chassis">
 <div class="machine-header">
 <div class="brand-title">DIGGER'S VAULT PRO</div>
-<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v4.1</div>
+<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v5.0</div>
 </div>
 <!-- 1. サンプリング・ターゲット指定 -->
 
@@ -1238,21 +1238,6 @@ body{
   </div>
   <div id="parse-status" style="margin-top:10px;font-size:13px;opacity:.85;">WAITING FOR GEMINI RESULT</div>
   <div id="candidate-crate" style="margin-top:12px;"></div>
-  <div id="final-crate-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
-    <div class="section-title">FINAL CRATE</div>
-    <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
-      Spotify検証結果から最終16曲を選択。VERIFY後はVERIFIED曲を上から最大16曲まで自動投入します。
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <button type="button" id="final-auto">AUTO 16</button>
-      <button type="button" id="final-clear">CLEAR CRATE</button>
-      <button type="button" id="final-redig">COPY RE-DIG</button>
-    </div>
-    <div id="final-status" style="margin-top:10px;font-size:13px;opacity:.85;">0 / 16 TRACKS</div>
-    <div id="final-crate" style="margin-top:12px;"></div>
-    <div id="final-pool" style="margin-top:16px;"></div>
-  </div>
-
   <div id="spotify-verify-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
     <div class="section-title">SPOTIFY VERIFY</div>
     <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
@@ -1269,6 +1254,24 @@ body{
     </div>
     <div id="spotify-status" style="margin-top:10px;font-size:13px;opacity:.85;">NOT CONNECTED</div>
     <div id="spotify-verify-results" style="margin-top:12px;"></div>
+  </div>
+
+
+  <div id="final-crate-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
+    <div class="section-title">FINAL CRATE</div>
+    <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
+      Spotify検証結果から最終16曲を選択。VERIFY後はVERIFIED曲を上から最大16曲まで自動投入します。
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <button type="button" id="final-auto">AUTO 16</button>
+      <button type="button" id="final-clear">CLEAR CRATE</button>
+      <button type="button" id="final-redig">COPY RE-DIG</button>
+      <button type="button" id="final-send" disabled>SEND TO SPOTIFY</button>
+    </div>
+    <div id="final-send-status" style="margin-top:8px;font-size:12px;opacity:.78;"></div>
+    <div id="final-status" style="margin-top:10px;font-size:13px;opacity:.85;">0 / 16 TRACKS</div>
+    <div id="final-crate" style="margin-top:12px;"></div>
+    <div id="final-pool" style="margin-top:16px;"></div>
   </div>
 
 
@@ -2199,7 +2202,8 @@ async function spotifyConnect() {
     redirect_uri: redirectUri,
     code_challenge_method: "S256",
     code_challenge: challenge,
-    state
+    state,
+    scope: "playlist-modify-private"
   });
   window.location.href = `${SPOTIFY_AUTH}?${params.toString()}`;
 }
@@ -2355,13 +2359,15 @@ async function spotifyVerifyCandidates() {
 }
 
 
-// === FINAL CRATE v4.1 ===
+// === FINAL CRATE v5.0 ===
 const finalCrateEl = document.getElementById("final-crate");
 const finalPoolEl = document.getElementById("final-pool");
 const finalStatusEl = document.getElementById("final-status");
 const finalAutoBtn = document.getElementById("final-auto");
 const finalClearBtn = document.getElementById("final-clear");
 const finalRedigBtn = document.getElementById("final-redig");
+const finalSendBtn = document.getElementById("final-send");
+const finalSendStatusEl = document.getElementById("final-send-status");
 let finalCrate = [];
 let finalVerifyResults = [];
 
@@ -2416,6 +2422,7 @@ function renderFinalCrate() {
   finalCrateEl.innerHTML=""; finalPoolEl.innerHTML="";
   const n=finalCrate.length;
   finalStatusEl.textContent = n === 16 ? "16 / 16 TRACKS · FINAL CRATE READY" : `${n} / 16 TRACKS · ${16-n} NEEDED`;
+  finalSendBtn.disabled = n !== 16 || !finalCrate.every(r => r.spotifyUri || r.spotifyTrackId);
   finalCrate.forEach((r,i)=>{
     const row=document.createElement("div");
     row.style.cssText="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.09);font-size:13px;line-height:1.4;";
@@ -2451,6 +2458,52 @@ async function finalCopyRedig() {
   try { await navigator.clipboard.writeText(cmd); finalStatusEl.textContent=`RE-DIG COPIED · ${need} NEEDED`; }
   catch(_){ finalStatusEl.textContent="COPY FAILED"; }
 }
+async function finalSendToSpotify() {
+  if (finalCrate.length !== 16) { finalSendStatusEl.textContent = "FINAL CRATE MUST CONTAIN EXACTLY 16 TRACKS"; return; }
+  const token = spotifyToken();
+  if (!token) { finalSendStatusEl.textContent = "CONNECT SPOTIFY FIRST"; return; }
+  const uris = finalCrate.map(r => r.spotifyUri || (r.spotifyTrackId ? `spotify:track:${r.spotifyTrackId}` : "")).filter(Boolean);
+  if (uris.length !== 16) { finalSendStatusEl.textContent = "16 SPOTIFY TRACK IDs REQUIRED"; return; }
+
+  finalSendBtn.disabled = true;
+  finalSendStatusEl.textContent = "CREATING SPOTIFY PLAYLIST…";
+  try {
+    const stamp = new Date().toLocaleDateString("ja-JP", {year:"numeric",month:"2-digit",day:"2-digit"});
+    const createRes = await fetch(`${SPOTIFY_API}/me/playlists`, {
+      method:"POST",
+      headers:{Authorization:`Bearer ${token}`, "Content-Type":"application/json"},
+      body:JSON.stringify({
+        name:`DIGGER'S VAULT · ${stamp}`,
+        description:"16-track crate created with DIGGER'S VAULT",
+        public:false
+      })
+    });
+    if (createRes.status === 401) throw new Error("AUTH_EXPIRED");
+    if (createRes.status === 403) throw new Error("PLAYLIST_SCOPE_REQUIRED");
+    if (!createRes.ok) throw new Error(`CREATE_HTTP_${createRes.status}`);
+    const playlist = await createRes.json();
+
+    finalSendStatusEl.textContent = "ADDING 16 TRACKS…";
+    const addRes = await fetch(`${SPOTIFY_API}/playlists/${encodeURIComponent(playlist.id)}/items`, {
+      method:"POST",
+      headers:{Authorization:`Bearer ${token}`, "Content-Type":"application/json"},
+      body:JSON.stringify({uris})
+    });
+    if (addRes.status === 401) throw new Error("AUTH_EXPIRED");
+    if (addRes.status === 403) throw new Error("PLAYLIST_SCOPE_REQUIRED");
+    if (!addRes.ok) throw new Error(`ADD_HTTP_${addRes.status}`);
+
+    const url = playlist.external_urls?.spotify || `https://open.spotify.com/playlist/${playlist.id}`;
+    finalSendStatusEl.innerHTML = `SENT · 16 TRACKS · <a href="${escapeHtml(url)}" target="_blank" rel="noopener">OPEN IN SPOTIFY</a>`;
+  } catch (e) {
+    if (e.message === "AUTH_EXPIRED") finalSendStatusEl.textContent = "SPOTIFY SESSION EXPIRED · DISCONNECT / CONNECT AGAIN";
+    else if (e.message === "PLAYLIST_SCOPE_REQUIRED") finalSendStatusEl.textContent = "PLAYLIST PERMISSION REQUIRED · DISCONNECT / CONNECT AGAIN";
+    else finalSendStatusEl.textContent = `SEND ERROR · ${e.message}`;
+  } finally {
+    finalSendBtn.disabled = finalCrate.length !== 16;
+  }
+}
+
 finalCrateEl.addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b)return;
   if(b.dataset.finalRemove!==undefined) finalRemove(+b.dataset.finalRemove);
@@ -2461,6 +2514,7 @@ finalPoolEl.addEventListener("click",e=>{ const b=e.target.closest("button[data-
 finalAutoBtn.addEventListener("click",finalAuto);
 finalClearBtn.addEventListener("click",()=>{finalCrate=[];finalSave();renderFinalCrate();});
 finalRedigBtn.addEventListener("click",finalCopyRedig);
+finalSendBtn.addEventListener("click",finalSendToSpotify);
 finalRestore(); renderFinalCrate();
 
 spotifyConnectBtn.addEventListener("click", spotifyConnect);
