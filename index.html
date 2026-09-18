@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+
+<html lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>DIGGER'S VAULT PRO - MK-VI DEFINITIVE</title>
+<style>
+    :root {
+      --bg: #050608;
+      --chassis: #0e1117;
+      --border: #222938;
+      --border-focus: #ff4757;
+      
+      --oled-green: #2ed573;
+      --oled-amber: #ffa502;
+      --oled-cyan: #00d2d3;
+      --oled-pink: #ff4757;
+      --oled-purple: #a55eea;
+      --oled-yellow: #eccc68;
+      
+      --text-main: #f1f5f9;
+      --text-dim: #64748b;
+      --text-bright: #ffffff;
+      
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'Consolas', 'Menlo', 'Courier New', monospace;
+    }
+    
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .vault-chassis {
+      background: linear-gradient(180deg, #12161f 0%, #0a0d13 100%);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      padding: 14px 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+    }
+
+    .machine-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1.5px solid #181f2c;
+      padding-bottom: 8px;
+    }
+    .brand-title {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--oled-pink);
+      text-shadow: 0 0 12px rgba(255,71,87,0.35);
+    }
+    .machine-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 4px;
+      background: #141822;
+      border: 1px solid #242c3d;
+      color: var(--oled-green);
+      text-shadow: 0 0 8px rgba(46,213,115,0.4);
+    }
+
+    .control-block {
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .block-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+      letter-spacing: 0.04em;
+    }
+    .status-pill {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.04);
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .target-button-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+    .target-btn {
+      height: 34px;
+      background-color: #080b10;
+      border: 1.5px solid #1c2333;
+      color: #94a3b8;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.15s ease;
+    }
+    .target-btn:hover { border-color: #2e384d; color: #cbd5e1; }
+    .target-btn.active {
+      background-color: #172033;
+      border-color: var(--oled-purple);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(165,94,234,0.35);
+      border-width: 1.8px;
+    }
+
+    /* ディグ深度（4段階）グリッド */
+    .depth-button-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .depth-btn {
+      height: 32px;
+      background-color: #06080c;
+      border: 1.5px solid #1c2230;
+      color: var(--text-dim);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .depth-btn:hover { border-color: #2e384d; color: #cbd5e1; }
+    .depth-btn.active {
+      background-color: #1a1e12;
+      border-color: var(--oled-green);
+      color: var(--oled-green);
+      box-shadow: 0 0 8px rgba(46,213,115,0.3);
+    }
+    .depth-btn[data-depth="MAJOR"].active {
+      background-color: #221d10;
+      border-color: var(--oled-yellow);
+      color: var(--oled-yellow);
+      box-shadow: 0 0 8px rgba(236,204,104,0.3);
+    }
+
+    /* アーティスト／ボーカル属性グリッド */
+    .vocal-button-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+    .vocal-btn {
+      height: 32px;
+      background-color: #06080c;
+      border: 1.5px solid #1c2230;
+      color: var(--text-dim);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .vocal-btn:hover { border-color: #2e384d; color: #cbd5e1; }
+    .vocal-btn.active {
+      background-color: #1c1524;
+      border-color: var(--oled-pink);
+      color: var(--oled-pink);
+      box-shadow: 0 0 8px rgba(255,71,87,0.3);
+    }
+
+    .era-button-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .era-btn {
+      height: 32px;
+      background-color: #06080c;
+      border: 1.5px solid #1c2230;
+      color: var(--text-dim);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .era-btn:hover { border-color: #2e384d; color: #cbd5e1; }
+    .era-btn.active {
+      background-color: #171d2b;
+      border-color: var(--oled-cyan);
+      color: var(--oled-cyan);
+      box-shadow: 0 0 8px rgba(0,210,211,0.3);
+    }
+
+    .btn-toggle-mutation {
+      width: 100%;
+      height: 36px;
+      background-color: #06080c;
+      border: 1.5px solid #1c2230;
+      color: var(--text-dim);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      transition: all 0.15s ease;
+    }
+    .btn-toggle-mutation.active {
+      background-color: #161e14;
+      border-color: var(--oled-green);
+      color: var(--oled-green);
+      box-shadow: 0 0 10px rgba(46,213,115,0.25);
+    }
+    .mutation-status {
+      font-size: 0.64rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    input[type="number"], select, .custom-trigger {
+      width: 100%;
+      height: 40px;
+      background-color: #06080c;
+      border: 1.5px solid #1c2230;
+      color: var(--text-bright);
+      padding: 0 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    input:focus, select:focus, .custom-trigger:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 10px rgba(255,71,87,0.25);
+    }
+
+    .custom-wrapper { position: relative; user-select: none; }
+    .custom-trigger::after {
+      content: "▼";
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      margin-left: 6px;
+    }
+    .custom-menu {
+      position: absolute;
+      top: 44px;
+      left: 0;
+      right: 0;
+      background-color: #080a0f;
+      border: 1.5px solid #283347;
+      border-radius: 8px;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.95);
+      z-index: 120;
+      max-height: 260px;
+      overflow-y: auto;
+      display: none;
+    }
+    .custom-menu.open { display: block; }
+    .menu-group-header {
+      padding: 7px 10px 3px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      background-color: #030508;
+      border-bottom: 1px solid #151a24;
+      position: sticky;
+      top: 0;
+    }
+    .menu-item {
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      border-bottom: 1px solid #121722;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .menu-item:hover, .menu-item.selected {
+      background-color: #171d2b;
+      color: #ffffff;
+    }
+    .menu-item .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .bpm-control {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .bpm-btn {
+      width: 34px;
+      height: 40px;
+      background: #141822;
+      border: 1.5px solid #202738;
+      color: #cbd5e1;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .bpm-btn:active { background: #ff4757; color: #fff; }
+
+    .terminal-screen {
+      margin-top: 10px;
+      background-color: #020305;
+      border: 1.5px solid #1a2233;
+      border-radius: 8px;
+      padding: 10px;
+      position: relative;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .screen-title {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+    }
+    .rec-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--oled-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--oled-green);
+    }
+    .output-payload {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: var(--oled-green);
+      min-height: 50px;
+      word-break: break-word;
+      white-space: pre-wrap;
+      user-select: all;
+      font-weight: 500;
+      text-shadow: 0 0 6px rgba(46,213,115,0.25);
+    }
+
+    .trigger-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-fire {
+      width: 100%;
+      height: 44px;
+      background: linear-gradient(180deg, #ff5252 0%, #d63031 100%);
+      color: #fff;
+      border: none;
+      font-weight: 900;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(214,48,49,0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-fire:active { transform: scale(0.98); filter: brightness(1.15); }
+    
+    .btn-save-html {
+      width: 100%;
+      height: 38px;
+      background-color: #121620;
+      color: #94a3b8;
+      border: 1px solid #232b3d;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-save-html:active { background-color: #202738; color: #fff; }
+
+
+    /* === MK-VI VISUAL REFINEMENT — design only === */
+    body {
+      background:
+        radial-gradient(circle at 50% -10%, rgba(255,71,87,.09), transparent 30%),
+        radial-gradient(circle at 50% 110%, rgba(0,210,211,.045), transparent 34%),
+        #030406;
+      padding: 14px 10px 24px;
+    }
+    .vault-chassis {
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.035), transparent 24%),
+        linear-gradient(180deg, #121720 0%, #090c12 46%, #07090e 100%);
+      border-color: #293142;
+      border-radius: 18px;
+      padding: 15px 13px 14px;
+      box-shadow:
+        0 24px 60px rgba(0,0,0,.78),
+        0 0 0 1px rgba(255,255,255,.025),
+        inset 0 1px 0 rgba(255,255,255,.075),
+        inset 0 -1px 0 rgba(0,0,0,.8);
+    }
+    .vault-chassis::before,
+    .vault-chassis::after {
+      content:"";
+      position:absolute;
+      width:5px;height:5px;border-radius:50%;
+      background:#07090d;
+      border:1px solid #303849;
+      box-shadow:inset 0 1px 2px #000, 0 1px 0 rgba(255,255,255,.05);
+      top:8px;
+    }
+    .vault-chassis::before { left:8px; }
+    .vault-chassis::after { right:8px; }
+    .machine-header {
+      margin: 0 4px 14px;
+      padding: 2px 4px 10px;
+      border-bottom: 1px solid #252c3a;
+      box-shadow: 0 1px 0 rgba(0,0,0,.7);
+    }
+    .brand-title {
+      font-size: .96rem;
+      letter-spacing: .12em;
+      color:#ff5a67;
+      text-shadow: 0 0 16px rgba(255,71,87,.32);
+    }
+    .machine-badge {
+      border-color:#334055;
+      background:linear-gradient(180deg,#171d27,#0d1118);
+      padding:4px 8px;
+      letter-spacing:.06em;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .control-block {
+      margin-bottom: 11px;
+      padding: 9px 9px 10px;
+      border:1px solid #171d28;
+      border-radius:10px;
+      background:linear-gradient(180deg,rgba(255,255,255,.018),rgba(0,0,0,.08));
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.018);
+    }
+    .block-label { margin-bottom:7px; font-size:.67rem; letter-spacing:.065em; }
+    .status-pill {
+      padding:2px 6px;
+      border-radius:4px;
+      background:#080b10;
+      box-shadow:inset 0 1px 2px rgba(0,0,0,.8);
+    }
+    .target-btn,.depth-btn,.vocal-btn,.era-btn,.bpm-btn,.btn-toggle-mutation,
+    input[type="number"],select,.custom-trigger {
+      border-color:#283144;
+      background:linear-gradient(180deg,#10151d 0%,#070a0f 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 2px 4px rgba(0,0,0,.25);
+    }
+    .target-btn,.depth-btn,.vocal-btn,.era-btn { border-radius:5px; }
+    .target-btn:active,.depth-btn:active,.vocal-btn:active,.era-btn:active,.bpm-btn:active {
+      transform:translateY(1px);
+      box-shadow:inset 0 2px 4px rgba(0,0,0,.65);
+    }
+    .target-btn.active,.depth-btn.active,.vocal-btn.active,.era-btn.active {
+      box-shadow:0 0 0 1px currentColor, 0 0 12px color-mix(in srgb,currentColor 25%,transparent), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .custom-trigger, select, input[type="number"] { border-radius:6px; }
+    .custom-trigger::after { color:#a9b4c7; }
+    .custom-menu {
+      background:rgba(7,10,15,.98);
+      border-color:#344057;
+      border-radius:7px;
+      box-shadow:0 20px 44px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.025);
+    }
+    .menu-group-header { background:#05070b; }
+    .menu-item { border-bottom-color:#171d28; }
+    .menu-item:hover,.menu-item.selected { background:#171e2a; }
+    .btn-toggle-mutation { border-radius:6px; }
+    .bpm-control input[type="number"] {
+      text-align:center;
+      font-family:var(--font-mono);
+      font-weight:900;
+      font-size:1rem;
+      color:#fff;
+    }
+    .terminal-screen {
+      margin-top:12px;
+      border:1px solid #26344a;
+      border-radius:9px;
+      padding:11px 12px 12px;
+      background:
+        repeating-linear-gradient(0deg,rgba(46,213,115,.018) 0,rgba(46,213,115,.018) 1px,transparent 1px,transparent 3px),
+        radial-gradient(circle at 50% 30%,rgba(46,213,115,.055),transparent 70%),
+        #010302;
+      box-shadow:inset 0 0 22px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.035);
+    }
+    .screen-title { color:#75839a; letter-spacing:.1em; }
+    .rec-dot { width:5px;height:5px; }
+    .output-payload { font-size:.78rem; line-height:1.48; text-shadow:0 0 7px rgba(46,213,115,.34); }
+    .trigger-group { gap:7px; margin-top:10px; }
+    .btn-fire {
+      height:46px;
+      border:1px solid #ff6672;
+      border-radius:7px;
+      background:linear-gradient(180deg,#ff5967 0%,#d72f3e 52%,#b82130 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28), 0 5px 16px rgba(214,48,49,.28);
+      text-shadow:0 1px 1px rgba(0,0,0,.45);
+    }
+    .btn-save-html {
+      border-radius:7px;
+      background:linear-gradient(180deg,#141a24,#0b0f16);
+      border-color:#293247;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+    }
+    @media (max-width:380px) {
+      .vault-chassis { padding-left:10px; padding-right:10px; }
+      .control-block { padding-left:7px; padding-right:7px; }
+      .block-label { font-size:.63rem; }
+      .status-pill { font-size:.58rem; }
+    }
+
+
+    /* === MK-VI INDUSTRIAL REDESIGN v2 — VISUAL ONLY === */
+    :root{
+      --bg:#070809; --chassis:#111315; --border:#353a3f;
+      --text-main:#e8e9e6; --text-dim:#8c9298; --text-bright:#fff;
+      --oled-green:#72ff9a; --oled-amber:#ffb547; --oled-cyan:#48e5e7;
+      --oled-pink:#ff4d5e; --oled-purple:#b784ff; --oled-yellow:#ffe27a;
+    }
+    body{
+      background:
+        radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.055),transparent 34%),
+        linear-gradient(180deg,#08090a 0%,#020303 100%);
+      padding:18px 10px 32px;
+    }
+    .vault-chassis{
+      max-width:500px;
+      padding:18px 14px 16px;
+      border:1px solid #3d4247;
+      border-radius:12px;
+      background:
+        repeating-linear-gradient(90deg,rgba(255,255,255,.008) 0,rgba(255,255,255,.008) 1px,transparent 1px,transparent 4px),
+        linear-gradient(180deg,#191c1f 0%,#101214 9%,#0b0d0f 100%);
+      box-shadow:0 28px 70px #000, inset 0 1px 0 rgba(255,255,255,.11), inset 0 -1px 0 #000;
+    }
+    .vault-chassis::before,.vault-chassis::after{
+      width:7px;height:7px;top:9px;background:radial-gradient(circle at 35% 35%,#73777b 0,#303337 25%,#0b0c0d 70%);
+      border:1px solid #050505;box-shadow:0 0 0 1px #34383b,inset 0 0 2px #000;
+    }
+    .vault-chassis::before{left:10px}.vault-chassis::after{right:10px}
+    .machine-header{
+      min-height:52px;margin:0 5px 15px;padding:5px 7px 12px;
+      border-bottom:2px solid #2b3034;
+      box-shadow:0 1px 0 #050505;
+    }
+    .brand-title{
+      font-size:1.08rem;letter-spacing:.16em;color:#f2f2ef;text-shadow:none;
+      position:relative;padding-left:13px;
+    }
+    .brand-title::before{
+      content:"";position:absolute;left:0;top:50%;width:5px;height:22px;transform:translateY(-50%);
+      border-radius:2px;background:#ff4053;box-shadow:0 0 12px rgba(255,64,83,.65);
+    }
+    .machine-badge{
+      color:#bfc5c9;background:#090b0c;border:1px solid #41474c;border-radius:3px;
+      padding:5px 8px;letter-spacing:.11em;box-shadow:inset 0 0 0 1px #050505;
+    }
+    .control-block{
+      margin-bottom:10px;padding:10px 10px 11px;border:1px solid #292e32;border-radius:7px;
+      background:linear-gradient(180deg,#141719 0%,#0b0d0f 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 2px 5px rgba(0,0,0,.45);
+    }
+    .block-label{
+      min-height:19px;margin-bottom:8px;color:#a6acb1;font-size:.66rem;font-weight:800;letter-spacing:.075em;
+    }
+    .block-label>span:first-child{color:#c7cbce}
+    .status-pill{
+      border-radius:2px!important;background:#050606!important;padding:3px 6px!important;
+      box-shadow:inset 0 0 0 1px #17191b!important;font-size:.58rem!important;letter-spacing:.045em;
+    }
+    .target-button-grid{gap:6px}.depth-button-grid,.vocal-button-grid,.era-button-grid{gap:5px}
+    .target-btn,.depth-btn,.vocal-btn,.era-btn{
+      min-height:38px;height:38px;border-radius:4px!important;border:1px solid #383e43!important;
+      background:linear-gradient(180deg,#24282c 0%,#15181b 48%,#0c0e10 100%)!important;
+      color:#aeb4b9;box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 2px 2px #050505!important;
+      text-shadow:0 1px 1px #000;transition:transform .06s ease,filter .1s ease,border-color .1s ease!important;
+    }
+    .target-btn{font-size:.69rem}.depth-btn,.vocal-btn{font-size:.64rem}.era-btn{font-size:.62rem}
+    .target-btn:active,.depth-btn:active,.vocal-btn:active,.era-btn:active{transform:translateY(2px)!important;box-shadow:inset 0 2px 4px #000!important}
+    .target-btn.active,.depth-btn.active,.vocal-btn.active,.era-btn.active{
+      color:#fff!important;background:linear-gradient(180deg,#31363b 0%,#1b1f22 100%)!important;
+      border-color:currentColor!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),0 0 0 1px currentColor,0 0 12px color-mix(in srgb,currentColor 28%,transparent)!important;
+    }
+    .target-btn.active{color:var(--oled-purple)!important}.vocal-btn.active{color:var(--oled-pink)!important}
+    .depth-btn.active{color:var(--oled-green)!important}.depth-btn[data-depth="MAJOR"].active{color:var(--oled-yellow)!important}
+    .era-btn.active{color:var(--oled-cyan)!important}
+    select,.custom-trigger,input[type="number"]{
+      height:44px!important;border-radius:4px!important;border:1px solid #444a50!important;
+      background:linear-gradient(180deg,#171a1d,#0b0d0f)!important;color:#f2f3f1!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 2px 3px #050505!important;
+      font-weight:750!important;
+    }
+    .custom-trigger{padding:0 38px 0 12px!important;display:flex;align-items:center}
+    .custom-trigger::after{right:13px!important;color:#ff5362!important;font-size:.8rem}
+    .custom-menu{
+      border-radius:4px!important;border:1px solid #4b5258!important;background:#090b0c!important;
+      box-shadow:0 20px 50px #000!important;padding:4px!important;
+    }
+    .menu-group-header{background:#111416!important;border-bottom:1px solid #2a2f33!important;letter-spacing:.08em!important}
+    .menu-item{min-height:40px!important;padding:9px 10px!important;border-bottom:1px solid #1d2124!important;color:#c8cccf!important}
+    .menu-item:hover,.menu-item.selected{background:#202428!important;color:#fff!important}
+    .btn-toggle-mutation{
+      min-height:48px;border-radius:4px!important;border:1px solid #3c4247!important;
+      background:linear-gradient(180deg,#23272b,#101214)!important;color:#c7cbce!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 3px #050505!important;
+    }
+    .btn-toggle-mutation.active{border-color:#48e5e7!important;color:#fff!important;box-shadow:0 0 0 1px #48e5e7,0 0 13px rgba(72,229,231,.2)!important}
+    .mutation-status{padding:4px 7px!important;border-radius:2px!important;background:#050606!important}
+    .bpm-control{gap:7px!important}
+    .bpm-btn{
+      width:48px!important;height:44px!important;border-radius:4px!important;border:1px solid #484e54!important;
+      background:linear-gradient(180deg,#2a2f33,#111315)!important;color:#e8e9e6!important;font-size:1rem!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 2px 3px #050505!important;
+    }
+    .bpm-control input[type="number"]{font-size:1.18rem!important;color:#fff!important;letter-spacing:.08em}
+    .terminal-screen{
+      position:relative;margin-top:14px;padding:13px 13px 14px;border-radius:5px;border:2px solid #30363a;
+      background:repeating-linear-gradient(0deg,rgba(113,255,154,.025) 0,rgba(113,255,154,.025) 1px,transparent 1px,transparent 4px),#010503;
+      box-shadow:inset 0 0 30px #000,0 0 0 1px #050505,0 3px 8px #000;
+    }
+    .terminal-screen::before{
+      content:"";position:absolute;inset:4px;border:1px solid rgba(114,255,154,.08);pointer-events:none;
+    }
+    .screen-header{margin-bottom:8px}.screen-title{font-size:.58rem;letter-spacing:.15em;color:#829088}
+    .rec-dot{width:7px;height:7px;background:#ff4053;box-shadow:0 0 9px #ff4053}
+    .output-payload{min-height:62px;font-size:.8rem;line-height:1.55;color:#80ff9f;text-shadow:0 0 8px rgba(114,255,154,.42)}
+    .trigger-group{gap:8px;margin-top:12px}
+    .btn-fire{
+      height:52px;border-radius:5px;border:1px solid #ff7180;
+      background:linear-gradient(180deg,#ff5264 0%,#e22e43 48%,#a91528 100%);
+      font-family:var(--font-mono);font-size:.82rem;letter-spacing:.09em;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 5px 0 #6d0c19,0 9px 18px rgba(0,0,0,.55);
+    }
+    .btn-fire:active{transform:translateY(4px)!important;box-shadow:inset 0 2px 4px rgba(0,0,0,.5),0 1px 0 #6d0c19!important}
+    .btn-save-html{
+      height:42px;border-radius:4px;border:1px solid #3b4146;background:linear-gradient(180deg,#1d2124,#0d0f11);
+      color:#9da3a8;font-family:var(--font-mono);letter-spacing:.035em;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 2px 3px #050505;
+    }
+    @media(max-width:380px){
+      body{padding:8px 5px 20px}.vault-chassis{padding:14px 8px 12px}.control-block{padding:8px 7px 9px}
+      .target-btn,.depth-btn,.vocal-btn,.era-btn{height:36px;min-height:36px}.target-btn{font-size:.63rem}.depth-btn,.vocal-btn{font-size:.58rem}.era-btn{font-size:.56rem}
+      .brand-title{font-size:.92rem}.machine-badge{font-size:.55rem}
+    }
+
+
+    /* ===== PRO UI DESIGN PASS — visual design only / logic untouched ===== */
+    body{
+      padding:0 0 32px!important;
+      background:#070809!important;
+    }
+    .vault-chassis{
+      max-width:520px!important;
+      padding:0 14px 18px!important;
+      border:0!important;
+      border-radius:0 0 22px 22px!important;
+      background:#0b0d0f!important;
+      box-shadow:0 24px 70px rgba(0,0,0,.72)!important;
+      overflow:visible;
+    }
+    .machine-header{
+      min-height:112px!important;
+      margin:0 -14px 18px!important;
+      padding:24px 18px 18px!important;
+      border:0!important;
+      border-bottom:1px solid #2a2e31!important;
+      align-items:flex-end!important;
+      position:relative;
+      background:
+        linear-gradient(90deg,rgba(255,64,83,.11),transparent 42%),
+        linear-gradient(180deg,#171a1d,#0d0f11)!important;
+    }
+    .machine-header::after{
+      content:'DIG • SELECT • BUILD';
+      position:absolute;left:19px;top:17px;
+      font:700 .52rem/1 var(--font-mono);letter-spacing:.23em;color:#60666b;
+    }
+    .brand-title{
+      padding:0!important;font-size:1.34rem!important;line-height:1!important;
+      letter-spacing:.035em!important;color:#f5f5f3!important;text-shadow:none!important;
+    }
+    .brand-title::before{display:none!important}
+    .brand-title::after{
+      content:' / PRO';color:#ff4053;font-size:.64em;letter-spacing:.06em;
+    }
+    .machine-badge{
+      margin-bottom:1px!important;padding:5px 7px!important;
+      color:#9ea4a8!important;border-color:#343a3f!important;background:#0a0c0d!important;
+      font-size:.52rem!important;letter-spacing:.09em!important;
+    }
+
+    .control-block{
+      position:relative!important;margin:0 0 11px!important;padding:15px 12px 13px 17px!important;
+      border:1px solid #272b2f!important;border-radius:10px!important;
+      background:#111416!important;box-shadow:none!important;
+      overflow:visible;
+    }
+    .control-block::after{
+      content:'';position:absolute;left:-1px;top:13px;bottom:13px;width:3px;border-radius:0 2px 2px 0;
+      background:#454b50;
+    }
+    .vault-chassis > .control-block:nth-child(2)::after{background:var(--oled-purple)}
+    .vault-chassis > .control-block:nth-child(3)::after{background:var(--oled-green)}
+    .vault-chassis > .control-block:nth-child(4)::after{background:var(--oled-pink)}
+    .vault-chassis > .control-block:nth-child(5)::after{background:var(--oled-cyan)}
+    .vault-chassis > .control-block:nth-child(6)::after{background:var(--oled-amber)}
+    .vault-chassis > .control-block:nth-child(7)::after{background:#7f8c8d}
+    .vault-chassis > .control-block:nth-child(8)::after{background:#00d2d3}
+    .vault-chassis > .control-block:nth-child(9)::after{background:#48e5e7}
+    .vault-chassis > .control-block:nth-child(10)::after{background:#ff4053}
+
+    .block-label{
+      min-height:0!important;margin:0 0 11px!important;
+      font-size:.61rem!important;line-height:1.3!important;font-weight:850!important;
+      letter-spacing:.08em!important;color:#777e83!important;
+    }
+    .status-pill{
+      margin-left:8px!important;padding:3px 6px!important;border-width:0!important;border-radius:3px!important;
+      background:#090b0c!important;box-shadow:none!important;font-size:.53rem!important;
+    }
+
+    /* Real control redesign: larger, flatter, more deliberate proportions */
+    .target-button-grid{grid-template-columns:repeat(2,1fr)!important;gap:7px!important}
+    .target-btn{
+      height:47px!important;min-height:47px!important;justify-content:flex-start!important;padding:0 13px!important;
+      font-size:.71rem!important;letter-spacing:.025em!important;
+    }
+    .target-btn:first-child{grid-column:span 2!important}
+    .depth-button-grid,.vocal-button-grid{gap:7px!important}
+    .depth-btn,.vocal-btn{height:42px!important;min-height:42px!important;font-size:.61rem!important}
+    .era-button-grid{grid-template-columns:repeat(7,1fr)!important;gap:4px!important}
+    .era-btn{height:38px!important;min-height:38px!important;padding:0!important;font-size:.57rem!important}
+    .target-btn,.depth-btn,.vocal-btn,.era-btn{
+      border:1px solid #30353a!important;border-radius:7px!important;
+      background:#171a1d!important;color:#969da2!important;box-shadow:none!important;text-shadow:none!important;
+    }
+    .target-btn.active,.depth-btn.active,.vocal-btn.active,.era-btn.active{
+      background:#f0f1ed!important;color:#0a0b0c!important;border-color:#f0f1ed!important;
+      box-shadow:none!important;
+    }
+    .target-btn.active::before,.depth-btn.active::before,.vocal-btn.active::before,.era-btn.active::before{
+      content:'';width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:7px;opacity:.7;
+    }
+    .era-btn.active::before{margin-right:3px}
+
+    select,.custom-trigger{
+      height:54px!important;border:1px solid #33383d!important;border-radius:8px!important;
+      background:#080a0b!important;box-shadow:none!important;
+      font-size:.78rem!important;font-weight:800!important;
+    }
+    #phase-select{padding:0 14px!important;color:#f3f3f0!important}
+    .custom-trigger{padding:0 43px 0 14px!important}
+    #country-trigger{font-size:.82rem!important}
+    #style-trigger{min-height:62px!important;height:auto!important;padding-top:11px!important;padding-bottom:11px!important;line-height:1.35!important}
+    .custom-trigger::after{font-size:1rem!important;color:#70777c!important}
+    .custom-menu{border-radius:8px!important;padding:6px!important}
+    .menu-item{min-height:45px!important;border-radius:5px!important;border-bottom:0!important;margin:2px 0!important}
+    .menu-group-header{margin-top:6px!important;border-radius:4px!important}
+
+    .btn-toggle-mutation{
+      min-height:58px!important;padding:0 14px!important;border-radius:8px!important;
+      background:#090b0c!important;border:1px solid #34393d!important;box-shadow:none!important;
+      font-size:.75rem!important;
+    }
+    .btn-toggle-mutation.active{background:#112123!important;border-color:#48e5e7!important;box-shadow:none!important}
+    .mutation-status{font-size:.58rem!important}
+
+    .bpm-control{
+      display:grid!important;grid-template-columns:58px minmax(100px,1fr) 58px!important;gap:7px!important;
+      align-items:stretch!important;
+    }
+    .bpm-btn{
+      width:auto!important;height:58px!important;border:1px solid #363b40!important;border-radius:8px!important;
+      background:#171a1d!important;box-shadow:none!important;font-size:1.08rem!important;
+    }
+    .bpm-control input[type="number"]{
+      height:58px!important;border:1px solid #ff4053!important;border-radius:8px!important;
+      background:#070809!important;color:#fff!important;box-shadow:none!important;
+      font:900 1.55rem/1 var(--font-mono)!important;text-align:center!important;
+    }
+    .bpm-control > div{
+      grid-column:1 / -1!important;text-align:left!important;padding:2px 2px 0!important;
+      font-size:.58rem!important;letter-spacing:.12em!important;color:#737a7f!important;
+    }
+
+    .terminal-screen{
+      margin:18px 0 0!important;padding:0!important;border:1px solid #26332a!important;border-radius:11px!important;
+      background:#061009!important;box-shadow:none!important;overflow:hidden!important;
+    }
+    .terminal-screen::before{display:none!important}
+    .screen-header{
+      height:35px!important;margin:0!important;padding:0 12px!important;display:flex!important;align-items:center!important;
+      border-bottom:1px solid #17311f!important;background:#09160d!important;
+    }
+    .screen-title{font-size:.54rem!important;letter-spacing:.17em!important;color:#5e8068!important}
+    .output-payload{
+      min-height:118px!important;padding:15px 14px 17px!important;
+      font-size:.82rem!important;line-height:1.65!important;color:#8cffaa!important;text-shadow:none!important;
+    }
+
+    .trigger-group{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;margin-top:11px!important}
+    .btn-fire{
+      height:61px!important;border:0!important;border-radius:9px!important;
+      background:#ff4053!important;color:white!important;box-shadow:none!important;
+      font-size:.82rem!important;font-weight:900!important;letter-spacing:.08em!important;
+    }
+    .btn-fire::before{content:'▶  ';font-size:.8em}
+    .btn-save-html{
+      height:45px!important;border-radius:8px!important;border:1px solid #2e3337!important;
+      background:#111416!important;box-shadow:none!important;color:#7f878c!important;font-size:.64rem!important;
+    }
+
+    @media(min-width:521px){
+      body{padding-top:24px!important}
+      .vault-chassis{border-radius:22px!important;border:1px solid #25292d!important}
+      .machine-header{border-radius:21px 21px 0 0!important}
+    }
+    @media(max-width:380px){
+      .vault-chassis{padding-left:10px!important;padding-right:10px!important}
+      .machine-header{margin-left:-10px!important;margin-right:-10px!important;padding-left:14px!important;padding-right:14px!important}
+      .machine-header::after{left:15px!important}
+      .brand-title{font-size:1.13rem!important}
+      .control-block{padding-left:14px!important;padding-right:9px!important}
+      .target-btn{font-size:.64rem!important;padding-left:10px!important}
+      .depth-btn,.vocal-btn{font-size:.55rem!important}
+      .era-btn{font-size:.51rem!important}
+    }
+
+  
+
+/* === PRESENTATION EDITION / UI DESIGN PASS === */
+body{padding:8px;background:#070707;background-image:radial-gradient(circle at 50% -10%,rgba(255,255,255,.075),transparent 36%)}
+.vault-chassis{max-width:500px;padding:10px;border-radius:18px;border:1px solid #2b2b2b;background:linear-gradient(145deg,#171717,#0c0c0c 52%,#111);box-shadow:0 24px 70px #000,inset 0 1px rgba(255,255,255,.08)}
+.machine-header{height:52px;margin:-2px 0 8px;padding:0 3px 8px;border-bottom:1px solid #2a2a2a;align-items:flex-end}
+.brand-title{font-family:var(--font-ui);font-size:1.28rem;line-height:.9;letter-spacing:-.045em;color:#fff;text-shadow:none;font-weight:950}
+.brand-title:after{content:' / SELECT • DIG • MIX';display:block;margin-top:7px;font:700 .48rem var(--font-mono);letter-spacing:.18em;color:#777}
+.machine-badge{background:#e8ff3f;color:#0a0a0a;border:0;border-radius:999px;padding:5px 8px;text-shadow:none;font-size:.55rem;letter-spacing:.06em}
+.control-block{margin-bottom:6px;padding:7px 8px 8px;border:1px solid #252525;border-radius:10px;background:linear-gradient(180deg,#151515,#101010)}
+.block-label{font-size:.57rem;margin-bottom:6px;color:#888;letter-spacing:.08em}.block-label>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.status-pill{font-size:.52rem;border:0!important;background:#242424!important;padding:3px 6px;border-radius:999px;max-width:42%}
+.target-button-grid{grid-template-columns:repeat(6,1fr);gap:3px}.target-btn,.depth-btn,.vocal-btn,.era-btn{height:30px;border-radius:5px;border:1px solid #292929;background:#0a0a0a;box-shadow:none;font-size:.57rem;letter-spacing:-.02em}.target-btn.active,.depth-btn.active,.vocal-btn.active,.era-btn.active{background:#f2f2f2!important;color:#080808!important;border-color:#fff!important;box-shadow:none!important}
+.depth-button-grid,.vocal-button-grid{gap:3px}.era-button-grid{gap:3px}
+select,.custom-trigger{min-height:38px!important;border-radius:7px!important;background:#080808!important;border:1px solid #303030!important;color:#f4f4f4!important;font-size:.76rem!important;font-weight:750!important;box-shadow:none!important}
+.custom-trigger{padding:9px 34px 9px 10px!important}.custom-trigger:after{right:12px!important}
+.custom-menu{border-radius:9px!important;border:1px solid #353535!important;background:#101010!important;box-shadow:0 18px 50px #000!important}.menu-item{padding:10px!important;font-size:.74rem!important}.menu-group-header{padding:8px 10px 5px!important;font-size:.56rem!important}
+.btn-toggle-mutation{min-height:38px!important;border-radius:7px!important;background:#0a0a0a!important;border:1px solid #303030!important;padding:8px 10px!important;font-size:.66rem!important}.btn-toggle-mutation.active{border-color:#e8ff3f!important;background:#171a08!important;color:#e8ff3f!important}
+.bpm-control{display:grid!important;grid-template-columns:48px 88px 48px 1fr;gap:5px;align-items:center}.bpm-btn{height:42px!important;border-radius:7px!important;background:#0a0a0a!important;border:1px solid #333!important;font-size:.68rem!important}#bpm-input{height:42px!important;border-radius:7px!important;background:#e8ff3f!important;color:#050505!important;border:0!important;font-size:1.45rem!important;font-weight:950!important;text-align:center!important;box-shadow:none!important}
+.bpm-range-wrap{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0}.bpm-range-label{font:700 .48rem var(--font-mono);color:#777;margin-right:2px}.range-btn{height:28px;min-width:34px;padding:0 6px;border:1px solid #303030;border-radius:5px;background:#090909;color:#777;font:800 .55rem var(--font-mono);cursor:pointer}.range-btn.active{background:#e8ff3f;color:#070707;border-color:#e8ff3f}.bank-mark{display:none!important}
+.terminal-screen{margin-top:7px!important;border-radius:10px!important;border:1px solid #32450e!important;background:#0a0d05!important;box-shadow:inset 0 0 25px rgba(232,255,63,.035)!important;padding:9px!important}.screen-header{margin-bottom:5px!important}.screen-title{font-size:.53rem!important;letter-spacing:.14em!important;color:#87944b!important}.output-payload{font-size:.69rem!important;line-height:1.42!important;color:#e8ff3f!important;min-height:48px!important}
+.trigger-group{display:grid!important;grid-template-columns:1.45fr .55fr!important;gap:5px!important;margin-top:7px!important}.btn-fire,.btn-save-html{height:44px!important;border-radius:8px!important;margin:0!important}.btn-fire{background:#e8ff3f!important;color:#070707!important;border:0!important;font-size:.78rem!important;font-weight:950!important;box-shadow:none!important}.btn-save-html{font-size:0!important;background:#111!important;border:1px solid #303030!important;color:#aaa!important}.btn-save-html:after{content:'SAVE';font:800 .64rem var(--font-mono)}
+@media(max-width:390px){body{padding:5px}.vault-chassis{padding:8px}.control-block{padding:6px;margin-bottom:5px}.target-btn,.depth-btn,.vocal-btn,.era-btn{height:28px;font-size:.53rem}.target-button-grid{grid-template-columns:repeat(3,1fr)}.brand-title{font-size:1.16rem}.bpm-control{grid-template-columns:42px 82px 42px 1fr}.range-btn{min-width:30px;padding:0 4px}}
+
+
+/* PRESENTATION v2 — readability-first mobile UI */
+body{padding:14px!important;font-size:17px!important}
+.vault-chassis{max-width:560px!important;padding:20px 16px!important;border-radius:18px!important}
+.machine-header{min-height:76px!important;margin-bottom:18px!important}
+.brand-title{font-size:1.45rem!important;letter-spacing:.04em!important}
+.machine-badge{font-size:.78rem!important;padding:8px 10px!important}
+.control-block{padding:16px 0 18px!important;margin:0!important}
+.block-label{font-size:.96rem!important;margin-bottom:12px!important;gap:10px!important;align-items:center!important}
+.status-pill{font-size:.74rem!important;padding:5px 8px!important;white-space:nowrap!important}
+.target-button-grid,.depth-button-grid,.vocal-button-grid,.major-button-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+.target-btn,.depth-btn,.vocal-btn,.major-btn{min-height:52px!important;height:auto!important;padding:9px 7px!important;font-size:.9rem!important;line-height:1.2!important;border-radius:9px!important;font-weight:800!important}
+.era-button-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+.era-btn{height:48px!important;font-size:.86rem!important;border-radius:8px!important}
+select,.custom-trigger{min-height:58px!important;font-size:1rem!important;border-radius:10px!important}
+#style-trigger{min-height:72px!important;font-size:1rem!important}
+.menu-item{min-height:54px!important;font-size:.96rem!important;padding:10px 12px!important}
+.btn-toggle-mutation{min-height:72px!important;font-size:.94rem!important;border-radius:10px!important}
+.mutation-status{font-size:.8rem!important}
+.bpm-control{gap:9px!important;flex-wrap:wrap!important}
+.bpm-btn{height:58px!important;min-width:70px!important;font-size:1.05rem!important;border-radius:9px!important}
+#bpm-input{height:58px!important;font-size:1.65rem!important;min-width:105px!important;border-radius:9px!important}
+.bpm-range-wrap{width:100%!important;display:grid!important;grid-template-columns:auto repeat(3,1fr)!important;gap:7px!important;align-items:center!important;margin-top:3px!important}
+.bpm-range-label{font-size:.82rem!important;padding-right:5px!important}
+.range-btn{height:45px!important;font-size:.9rem!important;border-radius:8px!important}
+.major-btn{background:#080a0c;border:1.5px solid #252b33;color:#aeb6c2}
+.major-btn.active{color:var(--oled-yellow);border-color:var(--oled-yellow);background:#17150d;box-shadow:0 0 12px rgba(236,204,104,.18)}
+.control-note{font-size:.82rem;line-height:1.55;color:#858e9b;margin-top:10px;padding:0 2px}
+.terminal-screen{margin-top:6px!important;padding:15px!important;border-radius:11px!important}
+.screen-title{font-size:.8rem!important}
+.output-payload{font-size:.91rem!important;line-height:1.6!important;min-height:112px!important}
+.trigger-group{gap:10px!important;margin-top:12px!important}
+.btn-fire{min-height:62px!important;font-size:1.05rem!important;border-radius:10px!important}
+.btn-save-html{min-height:48px!important;font-size:.86rem!important;border-radius:9px!important}
+@media(max-width:390px){body{padding:8px!important}.vault-chassis{padding:16px 12px!important}.brand-title{font-size:1.25rem!important}.block-label{font-size:.9rem!important}.target-btn,.depth-btn,.vocal-btn,.major-btn{font-size:.84rem!important}}
+
+/* v3: Xperia 1 II portrait + hybrid UI refinement */
+html,body{max-width:100%;overflow-x:hidden}
+.vault-chassis{width:min(100%,760px)!important;box-sizing:border-box!important;margin-inline:auto!important}
+.major-button-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
+.major-btn{min-width:0!important;padding-inline:5px!important;font-size:.82rem!important;white-space:normal!important}
+.major-btn-dekamori{border-color:#7b5d25!important}
+.major-btn-dekamori.active{color:#ffe08a!important;border-color:#ffe08a!important;box-shadow:0 0 18px rgba(255,224,138,.22)!important}
+@media(max-width:480px){
+ body{padding:7px!important}
+ .vault-chassis{padding:14px 11px!important;border-radius:12px!important}
+ .brand-title{font-size:1.22rem!important;letter-spacing:.07em!important}
+ .block-label{font-size:.92rem!important}
+ .target-button-grid,.depth-button-grid,.vocal-button-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .major-button-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .major-btn:last-child{grid-column:1/-1!important;min-height:56px!important;font-size:.98rem!important}
+ .target-btn,.depth-btn,.vocal-btn,.major-btn{min-height:54px!important;font-size:.9rem!important}
+ .oled-display,.output-view{max-width:100%!important;overflow-wrap:anywhere!important;word-break:break-word!important}
+ select,input,button{max-width:100%!important;box-sizing:border-box!important}
+}
+@media(max-width:360px){
+ body{padding:4px!important}
+ .vault-chassis{padding:12px 8px!important}
+ .target-btn,.depth-btn,.vocal-btn,.major-btn{font-size:.86rem!important;padding:8px 5px!important}
+}
+
+/* MK-VI SELECTOR CONTROL — main selectors first, Xperia-friendly */
+.block-label span:first-child{font-family:var(--font-mono);letter-spacing:.055em}
+.block-label small{font-family:var(--font-ui);font-size:.76em;letter-spacing:0;text-transform:none;color:#8b96a8}
+.three-button-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.smart-btn{min-height:46px;padding:8px 6px;border-radius:7px;border:1.5px solid #252d3d;background:#080b10;color:#9aa6b8;font-size:.82rem;font-weight:800;cursor:pointer}
+.smart-btn.active{color:#fff;border-color:var(--oled-cyan);background:#102126;box-shadow:0 0 10px rgba(0,210,211,.22)}
+.taste-bias-block .status-pill{color:var(--oled-cyan);border:1px solid var(--oled-cyan)}
+.freshness-block .status-pill{color:var(--oled-green);border:1px solid var(--oled-green)}
+.freshness-block .smart-btn.active{border-color:var(--oled-green);background:#102018;box-shadow:0 0 10px rgba(46,213,115,.2)}
+/* Primary digging selectors get visual priority */
+#country-wrapper .custom-trigger,#style-wrapper .custom-trigger{min-height:54px;font-size:.94rem;font-weight:800;padding:12px 13px}
+#country-wrapper,#style-wrapper{margin-bottom:2px}
+.bpm-control{padding:3px 0 5px}
+#bpm-input{font-size:1.35rem!important;font-weight:900!important}
+.trigger-group{grid-template-columns:1fr 1fr!important;gap:7px!important}
+#btn-copy{grid-column:1/-1;min-height:58px!important;font-size:1rem!important}
+#btn-download,#btn-code{min-height:46px!important;font-size:.76rem!important}
+@media(max-width:390px){
+ .vault-chassis{padding:12px 9px!important}
+ .block-label{font-size:.82rem!important}
+ .three-button-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .smart-btn{font-size:.75rem;padding:7px 3px}
+ #country-wrapper .custom-trigger,#style-wrapper .custom-trigger{font-size:.86rem;padding:11px 10px}
+ .bpm-range-wrap{width:100%;margin-top:7px!important}
+ .range-btn{min-width:0!important;flex:1}
+}
+@media(max-width:350px){.three-button-grid{grid-template-columns:1fr}.smart-btn{min-height:42px}}
+
+
+/* === MK-VI SELECTOR CONTROL / PREMIUM UI PASS === */
+:root{
+  --panel:#0b0f15;
+  --panel-hi:#111824;
+  --line:rgba(255,255,255,.10);
+  --line-soft:rgba(255,255,255,.055);
+  --glass:rgba(255,255,255,.035);
+}
+body{
+  background:
+    radial-gradient(circle at 50% -12%, rgba(255,71,87,.13), transparent 34%),
+    radial-gradient(circle at 90% 25%, rgba(0,210,211,.055), transparent 28%),
+    #040506;
+  padding:16px 10px 32px;
+}
+.vault-chassis{
+  max-width:520px;
+  padding:18px 14px 16px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.11);
+  background:linear-gradient(180deg,rgba(18,23,32,.98),rgba(7,10,15,.99));
+  box-shadow:0 28px 70px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.07);
+  overflow:visible;
+}
+.machine-header{padding:2px 2px 14px;margin-bottom:16px;border-bottom:1px solid var(--line-soft)}
+.brand-title{font-size:1.05rem;letter-spacing:.11em}.machine-badge{font-size:.67rem;padding:5px 8px;border-radius:6px}
+.control-block{
+  padding:13px 12px 14px;
+  margin-bottom:10px;
+  border:1px solid var(--line-soft);
+  border-radius:13px;
+  background:linear-gradient(180deg,rgba(255,255,255,.027),rgba(255,255,255,.012));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.block-label{font-size:.76rem;margin-bottom:8px;letter-spacing:.055em}.block-label small{font-size:.68rem;color:#7f8da2}
+.status-pill{font-size:.65rem;padding:3px 6px;border-radius:5px}
+.custom-trigger, select{
+  min-height:48px!important;
+  border-radius:9px!important;
+  font-size:.88rem!important;
+  padding:0 12px!important;
+  background:linear-gradient(180deg,#0d131c,#080c12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.custom-menu{border-radius:10px!important;box-shadow:0 22px 48px rgba(0,0,0,.7)!important;max-height:58vh!important}
+.menu-item{min-height:44px!important;padding:10px 12px!important;font-size:.84rem!important}.menu-group-header{padding:10px 12px 7px!important;font-size:.7rem!important}
+.target-button-grid,.depth-button-grid,.vocal-button-grid,.era-button-grid,.major-button-grid,.three-button-grid{gap:7px!important}
+.target-btn,.depth-btn,.vocal-btn,.era-btn,.major-btn,.smart-btn,.range-btn{
+  min-height:42px!important;height:auto!important;padding:7px 6px!important;border-radius:9px!important;font-size:.72rem!important;
+  background:linear-gradient(180deg,#0d121a,#070a0f)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.target-btn.active,.depth-btn.active,.vocal-btn.active,.era-btn.active,.major-btn.active,.smart-btn.active,.range-btn.active{transform:translateY(-1px);box-shadow:0 0 0 1px currentColor,0 8px 18px rgba(0,0,0,.34)!important}
+.bpm-control{gap:8px!important}.bpm-btn{min-width:52px!important;height:48px!important;border-radius:10px!important;font-size:.82rem!important}
+#bpm-input{height:48px!important;border-radius:10px!important;font-size:1.25rem!important;font-weight:900!important}
+.bpm-range-wrap{margin-top:9px!important;gap:7px!important}.bpm-range-label{font-size:.72rem!important}
+.control-note{font-size:.72rem!important;line-height:1.55!important;margin-top:8px!important;color:#8190a5!important}
+.terminal-screen{
+  margin-top:14px!important;border-radius:14px!important;padding:14px!important;
+  border:1px solid rgba(46,213,115,.34)!important;
+  background:radial-gradient(circle at 50% 0,rgba(46,213,115,.055),transparent 42%),#030806!important;
+  box-shadow:inset 0 0 28px rgba(0,0,0,.7),0 0 22px rgba(46,213,115,.055)!important;
+}
+.screen-header{margin-bottom:10px!important}.screen-title{font-size:.69rem!important;letter-spacing:.08em!important}.output-payload{font-size:.84rem!important;line-height:1.62!important;letter-spacing:.005em!important}
+.trigger-group{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-top:12px!important}
+.btn-fire{grid-column:1/-1!important;min-height:52px!important;border-radius:11px!important;font-size:.9rem!important;letter-spacing:.06em!important}
+.btn-save-html{min-height:46px!important;border-radius:10px!important;font-size:.72rem!important}
+@media(max-width:410px){
+  body{padding:8px 6px 24px}.vault-chassis{padding:13px 9px 12px;border-radius:16px}.control-block{padding:11px 9px 12px}
+  .brand-title{font-size:.9rem}.machine-badge{font-size:.59rem}
+  .target-button-grid{grid-template-columns:repeat(2,1fr)!important}.depth-button-grid,.vocal-button-grid{grid-template-columns:repeat(2,1fr)!important}
+  .era-button-grid{grid-template-columns:repeat(4,1fr)!important}.major-button-grid{grid-template-columns:repeat(2,1fr)!important}.major-btn-dekamori{grid-column:1/-1!important}
+  .three-button-grid{grid-template-columns:repeat(3,1fr)!important}
+  .block-label{font-size:.71rem}.status-pill{max-width:46%;font-size:.59rem}
+  .output-payload{font-size:.8rem!important}
+}
+
+</style>
+</head>
+<body>
+<div class="vault-chassis">
+<div class="machine-header">
+<div class="brand-title">DIGGER'S VAULT PRO</div>
+<div class="machine-badge">16-BANK MK-VI · SPOTIFY VERIFY v3</div>
+</div>
+<!-- 1. サンプリング・ターゲット指定 -->
+
+<!-- 2. ディグ深度（4段階：メジャー／標準／アンダーグラウンド／オブสキュア） -->
+
+<!-- 3. アーティスト / ボーカル属性 -->
+
+<!-- 4. 年代指定（質感自動バイアス連動） -->
+
+<!-- 5. プレイ展開フェーズ -->
+
+<!-- 6. 国・地域選択 -->
+
+<!-- 7. サブジャンル選択（オートバイアス連動） -->
+
+<!-- 8. メジャー曲の濃度 -->
+
+<!-- 8. 他国への飛び火・変異種トグルスイッチ -->
+
+<!-- 9. BPM & 16曲固定 -->
+
+<!-- OLEDスクリーン -->
+<div class="control-block">
+<div class="block-label"><span>1. COUNTRY / TERRITORY <small>/ 国・地域</small></span></div>
+<div class="custom-wrapper" id="country-wrapper">
+<div class="custom-trigger" id="country-trigger">南アフリカ (South Africa / Amapiano &amp; House)</div>
+<div class="custom-menu" id="country-options"><div class="menu-item selected">南アフリカ (South Africa / Amapiano &amp; House)</div><div class="menu-item">イギリス (United Kingdom)</div><div class="menu-item">アメリカ (United States)</div><div class="menu-item">ドイツ (Germany)</div><div class="menu-item">アルゼンチン (Argentina)</div><div class="menu-item">日本 (Japan)</div><div class="menu-item">西アフリカ (Nigeria &amp; Ghana)</div><div class="menu-item">スペイン &amp; イビザ (Spain &amp; Ibiza)</div><div class="menu-item">ジャマイカ (Jamaica)</div><div class="menu-item">ブラジル (Brazil)</div><div class="menu-item">スウェーデン &amp; 北欧 (Sweden &amp; Nordic)</div><div class="menu-item">オーストラリア (Australia)</div><div class="menu-item">ポルトガル &amp; アンゴラ (Portugal &amp; Angola)</div><div class="menu-item">東アフリカ (Uganda &amp; Tanzania)</div><div class="menu-item">ペルー (Peru / Amazonian Psych)</div><div class="menu-item">韓国 (South Korea / K-Groove)</div><div class="menu-item">インド (India / Bollywood Psych)</div><div class="menu-item">フランス (France)</div><div class="menu-item">イタリア (Italy / Library &amp; Italo)</div><div class="menu-item">ルーマニア (Romania / Rominimal)</div><div class="menu-item">メキシコ (Mexico)</div><div class="menu-item">カーボベルデ (Cabo Verde)</div><div class="menu-item">レバノン &amp; パレスチナ (Levant / Dabke)</div><div class="menu-item">アルジェリア &amp; 北アフリカ (Algeria / Raï)</div><div class="menu-item">東南アジア (Thailand &amp; Indonesia)</div><div class="menu-item">世界5大都市コレクション (Fashion Week Runways)</div></div>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>2. STYLE / GENRE <small>/ ジャンル・サブジャンル</small></span><span class="status-pill" id="cat-badge" style="color: rgb(0, 210, 211); border: 1px solid rgb(0, 210, 211);">CLUB / DANCE / BASS</span></div>
+<div class="custom-wrapper" id="style-wrapper">
+<div class="custom-trigger" id="style-trigger" style="border-color: rgb(0, 210, 211);"><span class="dot" style="background-color:#00d2d3"></span> <span style="margin-left:6px; color:#ffffff;">3-Step (アフロテック / 変則キック連打)</span></div>
+<div class="custom-menu" id="style-options"><div class="menu-group-header" style="color: rgb(0, 210, 211);">■ CLUB / DANCE / BASS</div><div class="menu-item selected"><span class="dot" style="background-color:#00d2d3"></span><span>3-Step (アフロテック / 変則キック連打)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>プライベート・スクール (ジャズコード × ログドラム)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>スギジャ / クァンタム (歪みログドラム × ホイッスル)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>プレトリア：バカルディ (変則スネア × 打楽器)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>ダーバン：ゴム［Gqom］ (ダークミニマル × 重低音)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>サウスアフリカン・ディープハウス (ソウルフル4つ打ち)</span></div><div class="menu-group-header" style="color: rgb(254, 202, 87);">■ POP / KAYO / R&amp;B / SOUL</div><div class="menu-item"><span class="dot" style="background-color:#feca57"></span><span>80s バブルガム・ポップ (シンセ歌謡ディスコ)</span></div><div class="menu-group-header" style="color: rgb(29, 209, 161);">■ ROOTS / RARE GROOVE</div><div class="menu-item"><span class="dot" style="background-color:#1dd1a1"></span><span>タウンシップ・ジャズ / クウェラ (生ブラス)</span></div></div>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>3. BPM / 16 TRACKS</span></div>
+<div class="bpm-control">
+<button class="bpm-btn" id="bpm-dec">-5</button>
+<input id="bpm-input" max="220" min="40" step="1" type="number"/>
+<button class="bpm-btn" id="bpm-inc">+5</button>
+<div class="bpm-range-wrap" id="bpm-range-wrap"><span class="bpm-range-label">BPM幅</span><button class="range-btn" data-range="3">±3</button><button class="range-btn active" data-range="5">±5</button><button class="range-btn" data-range="8">±8</button></div>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>4. SAMPLING TARGET <small>/ サンプリング対象</small></span><span class="status-pill" id="target-badge" style="color:var(--oled-purple); border:1px solid var(--oled-purple);">FULL TRACK</span></div>
+<div class="target-button-grid" id="target-grid">
+<button class="target-btn active" data-target="">すべて</button>
+<button class="target-btn" data-target="open live acoustic drum break solo, no music intro">ドラムブレイク</button>
+<button class="target-btn" data-target="isolated drum one-shot">ワンショット</button>
+<button class="target-btn" data-target="rhodes chord progression loop">コードループ</button>
+<button class="target-btn" data-target="unfiltered dry bassline loop">ベースライン</button>
+<button class="target-btn" data-target="vocal phrase chop">ボーカルチョップ</button>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>5. CRATE DEPTH <small>/ ディグの深さ</small></span><span class="status-pill" id="depth-badge" style="color:var(--oled-green); border:1px solid var(--oled-green);">BALANCED</span></div>
+<div class="depth-button-grid" id="depth-grid">
+<button class="depth-btn" data-depth="MAJOR">メジャー</button>
+<button class="depth-btn active" data-depth="">標準</button>
+<button class="depth-btn" data-depth="UNDERGROUND">アンダーグラウンド</button>
+<button class="depth-btn" data-depth="OBSCURE">激深</button>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>6. VOCAL TYPE <small>/ ボーカル</small></span><span class="status-pill" id="vocal-badge" style="color:var(--oled-pink); border:1px solid var(--oled-pink);">ALL (ANY)</span></div>
+<div class="vocal-button-grid" id="vocal-grid">
+<button class="vocal-btn active" data-vocal="">すべて</button>
+<button class="vocal-btn" data-vocal="male vocalists">男性</button>
+<button class="vocal-btn" data-vocal="female vocalists">女性</button>
+<button class="vocal-btn" data-vocal="instrumental only, no vocals">インスト</button>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>7. ERA <small>/ 年代</small></span><span class="status-pill" id="era-badge" style="color:var(--oled-cyan); border:1px solid var(--oled-cyan);">ALL ERAS</span></div>
+<div class="era-button-grid" id="era-grid">
+<button class="era-btn active" data-era="ALL">すべて</button>
+<button class="era-btn" data-era="60s">60s</button>
+<button class="era-btn" data-era="70s">70s</button>
+<button class="era-btn" data-era="80s">80s</button>
+<button class="era-btn" data-era="90s">90s</button>
+<button class="era-btn" data-era="2000s">00s</button>
+<button class="era-btn" data-era="modern">MOD</button>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>8. PLAY PHASE <small>/ プレイ展開</small></span><span class="status-pill" id="phase-badge" style="color:var(--oled-amber); border:1px solid var(--oled-amber);">16-BANK ARC</span></div>
+<select id="phase-select">
+<option selected="" value="none">🌌 16曲DJセット展開 (Warmup〜Peak〜Comedown)</option>
+<option value="warmup">🌅 1. ウォームアップ (序盤・低域特化)</option>
+<option value="buildup">📈 2. ビルドアップ (中盤・グルーヴ特化)</option>
+<option value="peak">🔥 3. ピークタイム (メイン・高揚特化)</option>
+<option value="afterhours">🌌 4. アフターアワーズ (終盤・浮遊特化)</option>
+</select>
+</div><div class="control-block major-presence-block">
+<div class="block-label"><span>9. MAJOR PRESENCE <small>/ メジャー度</small></span><span class="status-pill" id="major-badge" style="color:var(--oled-yellow); border:1px solid var(--oled-yellow);">なし</span></div>
+<div class="major-button-grid" id="major-grid">
+<button class="major-btn active" data-major="NONE">なし</button>
+<button class="major-btn" data-major="ACCENT">アクセント</button>
+<button class="major-btn" data-major="MIX">ミックス</button>
+<button class="major-btn" data-major="MAIN">メイン</button>
+<button class="major-btn major-btn-dekamori" data-major="DEKAMORI">デカ盛り</button>
+</div>
+<div class="control-note">ディグの深さはそのまま。セットの序盤・中盤・終盤に「分かる曲」をどれだけ覗かせるか。</div>
+</div><div class="control-block taste-bias-block">
+<div class="block-label"><span>10. TASTE BIAS <small>/ 好みの寄せ方</small></span><span class="status-pill" id="taste-badge">BALANCED</span></div>
+<div class="three-button-grid" id="taste-grid">
+<button class="smart-btn" data-taste="MY">いつもの好み</button>
+<button class="smart-btn active" data-taste="BALANCED">バランス</button>
+<button class="smart-btn" data-taste="NEW">未知へ</button>
+</div>
+</div><div class="control-block freshness-block">
+<div class="block-label"><span>11. FRESHNESS <small>/ 聴き慣れ度</small></span><span class="status-pill" id="fresh-badge">ANY</span></div>
+<div class="three-button-grid" id="fresh-grid">
+<button class="smart-btn active" data-fresh="ANY">指定なし</button>
+<button class="smart-btn" data-fresh="LESS">聴きすぎ回避</button>
+<button class="smart-btn" data-fresh="UNHEARD">未聴優先</button>
+</div>
+</div><div class="control-block">
+<div class="block-label"><span>12. GLOBAL MUTATIONS <small>/ 越境・変異</small></span></div>
+<button class="btn-toggle-mutation" id="btn-mutation">
+<span>🌍 GLOBAL MUTATIONS (他国継承・越境トラック)</span>
+<span class="mutation-status" id="mutation-status">OFF (PURE LOCAL)</span>
+</button>
+</div><div class="terminal-screen">
+<div class="screen-header">
+<span class="screen-title">SPOTIFY AI / DIRECT COMMAND</span>
+<span class="rec-dot"></span>
+</div>
+<div class="output-payload" id="output-view">GEMINI DIG COMMAND READY.</div>
+</div>
+<!-- パッドトリガー -->
+<div class="trigger-group">
+<button class="btn-fire" id="btn-copy">COPY PROMPT</button>
+<button class="btn-save-html" id="btn-download">SAVE HTML</button><button class="btn-save-html" id="btn-code">COPY HTML CODE</button>
+</div>
+</div>
+
+<section class="panel gemini-result-panel" id="gemini-result-panel" style="margin-top:16px;">
+  <div class="section-title">GEMINI RESULT IN</div>
+  <textarea id="gemini-result-input" rows="10" spellcheck="false"
+    placeholder="Geminiの結果をここに貼り付け&#10;Artist - Track&#10;Artist - Track"
+    style="width:100%;box-sizing:border-box;resize:vertical;min-height:180px;background:#080b0d;color:#d8ffe8;border:1px solid #34413b;border-radius:8px;padding:12px;font:14px/1.5 monospace;"></textarea>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+    <button type="button" id="parse-gemini-result">PARSE RESULT</button>
+    <button type="button" id="clear-gemini-result">CLEAR</button>
+  </div>
+  <div id="parse-status" style="margin-top:10px;font-size:13px;opacity:.85;">WAITING FOR GEMINI RESULT</div>
+  <div id="candidate-crate" style="margin-top:12px;"></div>
+  <div id="spotify-verify-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
+    <div class="section-title">SPOTIFY VERIFY</div>
+    <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
+      Spotify Developer Dashboard の Client ID と Redirect URI を設定して接続します。Client Secret は不要です。
+    </div>
+    <input id="spotify-client-id" type="text" autocomplete="off" placeholder="SPOTIFY CLIENT ID"
+      style="width:100%;box-sizing:border-box;background:#080b0d;color:#d8ffe8;border:1px solid #34413b;border-radius:8px;padding:11px;margin-bottom:8px;">
+    <input id="spotify-redirect-uri" type="url" autocomplete="off" placeholder="REDIRECT URI 例: http://127.0.0.1:8080/"
+      style="width:100%;box-sizing:border-box;background:#080b0d;color:#d8ffe8;border:1px solid #34413b;border-radius:8px;padding:11px;margin-bottom:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" id="spotify-connect">CONNECT SPOTIFY</button>
+      <button type="button" id="spotify-verify" disabled>VERIFY CANDIDATES</button>
+      <button type="button" id="spotify-disconnect">DISCONNECT</button>
+    </div>
+    <div id="spotify-status" style="margin-top:10px;font-size:13px;opacity:.85;">NOT CONNECTED</div>
+    <div id="spotify-verify-results" style="margin-top:12px;"></div>
+  </div>
+</section>
+
+<script>
+let currentTargetTag = "";
+let currentDepthType = "";
+let currentVocalTag = "";
+let selectedEras = new Set();
+let isMutationOn = false;
+let bpmRange = 5;
+let currentMajorPresence = "NONE";
+let currentTasteBias = "BALANCED";
+let currentFreshness = "ANY";
+
+const PHASE_TAGS = {
+  none: "Build a DJ-style arc from warm-up through peak to comedown.",
+  warmup: "Keep the energy suitable for the opening of a DJ set.",
+  buildup: "Gradually build energy across the playlist.",
+  peak: "Keep the energy suited to the peak of a DJ set.",
+  afterhours: "Keep the flow suited to a late-night after-hours set."
+};
+
+const DEPTH_TAGS = {
+  MAJOR: "era-defining hits and favorites",
+  UNDERGROUND: "deeper cuts",
+  OBSCURE: "hidden gems and deeper cuts"
+};
+
+const MAJOR_PRESENCE_TAGS = {
+  NONE: "",
+  ACCENT: "mix in some era-defining hits",
+  MIX: "mix favorites with deeper cuts",
+  MAIN: "focus on favorites and era-defining hits, with some deeper cuts",
+  DEKAMORI: "focus on era-defining hits and favorites"
+};
+
+const TASTE_BIAS_TAGS = {
+  MY: "that fit my taste",
+  BALANCED: "artists I love, mixed with new ones",
+  NEW: "artists I haven't heard before"
+};
+
+const FRESHNESS_TAGS = {
+  ANY: "",
+  LESS: "filter out tracks I've overplayed recently",
+  UNHEARD: "tracks I haven't played yet or have only listened to once"
+};
+
+const ERA_TEXTURE_TAGS = {
+  "60s": "vintage 1960s analog warmth, tube room acoustics",
+  "70s": "70s analog tape warmth, live room acoustics",
+  "80s": "80s solid-state punch, early digital reverb, gated drum",
+  "90s": "90s 12-bit sampler crunch, vinyl hiss, raw groove",
+  "2000s": "2000s club master production, punchy transients",
+  "modern": "modern high-fidelity mix, pristine low end"
+};
+
+const CATEGORIES = {
+  club: { label: "CLUB / DANCE / BASS", hex: "#00d2d3" },
+  soul: { label: "POP / KAYO / R&B / SOUL", hex: "#feca57" },
+  rock: { label: "ROCK / PUNK / METAL / PSYCH", hex: "#ff6b6b" },
+  roots: { label: "ROOTS / RARE GROOVE", hex: "#1dd1a1" },
+  fashion: { label: "RUNWAY / CINEMATIC", hex: "#a55eea" },
+  any: { label: "FREE / WORLDWIDE", hex: "#38ef7d" }
+};
+
+const COUNTRY_VAULT = {
+  south_africa: {
+    label: "南アフリカ (South Africa / Amapiano & House)",
+    styles: [
+      { cat: "club", name: "3-Step (アフロテック / 変則キック連打)", tags: "South Africa 3-Step Afro Tech broken kick heavy sub bass", bias: "Piano Hub, Soulistic Music release", mut: "UK Afro House / London bass crossover", bpm: 116 },
+      { cat: "club", name: "プライベート・スクール (ジャズコード × ログドラム)", tags: "South Africa Private School Amapiano Rhodes log drum", bias: "Piano Hub release", mut: "worldwide Amapiano jazz disciples", bpm: 113 },
+      { cat: "club", name: "スギジャ / クァンタム (歪みログドラム × ホイッスル)", tags: "South Africa Sgija Quantum distorted log drum whistle", bias: "Kabelo Sgija release", mut: "Lisbon Batida crossover", bpm: 113 },
+      { cat: "club", name: "プレトリア：バカルディ (変則スネア × 打楽器)", tags: "Pretoria Bacardi House snare rolls log drum", bias: "Kalawa Jazmee release", mut: "global broken beat mutations", bpm: 114 },
+      { cat: "club", name: "ダーバン：ゴム［Gqom］ (ダークミニマル × 重低音)", tags: "Durban Gqom dark minimal broken beat raw kick", bias: "Gqom Oh release", mut: "European industrial club mutations", bpm: 127 },
+      { cat: "club", name: "サウスアフリカン・ディープハウス (ソウルフル4つ打ち)", tags: "South Africa Deep House soulful warm pads four-on-the-floor", bias: "Stay True Sounds release", mut: "international deep house disciples", bpm: 120 },
+      { cat: "soul", name: "80s バブルガム・ポップ (シンセ歌謡ディスコ)", tags: "80s South Africa Bubblegum pop township disco synth hook", bias: " Gallo Music archive", mut: "Nigerian / Caribbean disco boogie crossover", bpm: 118 },
+      { cat: "roots", name: "タウンシップ・ジャズ / クウェラ (生ブラス)", tags: "Township Jazz Kwela brass swing groove", bias: "Trutone vintage catalog", mut: "London jazz crossover", bpm: 125 }
+    ]
+  },
+  uk: {
+    label: "イギリス (United Kingdom)",
+    styles: [
+      { cat: "club", name: "ブロークンビーツ (West London Bruk / 変則スウィング)", tags: "West London Broken Beat Bruk syncopated drum Rhodes sub bass", bias: "Talkin Loud catalog", mut: "Detroit / Berlin Bruk crossover", bpm: 128 },
+      { cat: "club", name: "UKガラージ / 2ステップ (スキッピー・スネア)", tags: "UK 2-Step Garage skippy syncopated snare warped bass", bias: "XL Recordings catalog", mut: "worldwide speed garage mutations", bpm: 134 },
+      { cat: "club", name: "ジャジー・ドラムンベース (アトモスフェリック)", tags: "Atmospheric Drum and Bass jazzy Rhodes strings Amen break", bias: "Metalheadz catalog", mut: "Tokyo / US atmospheric dnb", bpm: 165 },
+      { cat: "club", name: "初期ダブステップ (DMZ / 重低音ハーフステップ)", tags: "early Dubstep DMZ half-step heavy sub wobble", bias: "Hyperdub catalog", mut: "worldwide 140 sub bass disciples", bpm: 140 },
+      { cat: "club", name: "クラシック・ジャングル (アーメンブレイク / ラガ)", tags: "90s Jungle Amen break heavy 808 sub ragga vocal", bias: "Moving Shadow catalog", mut: "US / European modern jungle revival", bpm: 160 },
+      { cat: "club", name: "初期アシッドハウス (88年 Shoom / 303)", tags: "UK 1988 Acid House TB-303 TR-808 warehouse", bias: "Warp Records catalog", mut: "Chicago / Ibiza acid crossover", bpm: 124 },
+      { cat: "soul", name: "80s ニューロマンティック / シンセポップ", tags: "80s UK New Romantic Synth-Pop dramatic synth drums", bias: "Some Bizarre records", mut: "German / Japanese synthpop crossover", bpm: 118 },
+      { cat: "soul", name: "90s UK ソウル / アシッド・ジャズ", tags: "90s UK Soul Acid Jazz smooth Rhodes horn groove", bias: "Talkin Loud catalog", mut: "Japanese Shibuya-kei soul crossover", bpm: 104 },
+      { cat: "rock", name: "70s ブリティッシュ・ハードロック", tags: "70s British Hard Rock heavy blues riff dynamic drums", bias: "Swan Song records", mut: "US / Aussie heavy rock disciples", bpm: 120 },
+      { cat: "roots", name: "ブリストル・トリップホップ (重厚ダウンテンポ)", tags: "Bristol Sound trip hop slow heavy drum break strings", bias: "Ninja Tune catalog", mut: "worldwide cinematic downtempo", bpm: 80 }
+    ]
+  },
+  usa: {
+    label: "アメリカ (United States)",
+    styles: [
+      { cat: "club", name: "90s ブーンバップ (生ドラムブレイク / ジャズ)", tags: "90s Boom Bap acoustic drum break chopped jazz loop", bias: "Def Jam 90s catalog", mut: "Japanese / French 90s boom bap crossover", bpm: 92 },
+      { cat: "club", name: "ジャージー・クラブ / バルチモア (3連キック)", tags: "Jersey Club triplet kick pattern bed squeak vocal chops", bias: "Cartel Music release", mut: "worldwide club mutations (Paris, London)", bpm: 135 },
+      { cat: "club", name: "シカゴ・ハウス / アシッド (TR-707 / TB-303)", tags: "Chicago Deep House TB-303 squelch TR-707 raw groove", bias: "Trax Records catalog", mut: "UK / European warehouse crossover", bpm: 122 },
+      { cat: "club", name: "デトロイト・テクノ (マシンソウル / スタブ)", tags: "Detroit Techno machine soul chord stab TR-909", bias: "Underground Resistance UR", mut: "Berlin Tresor techno crossover", bpm: 128 },
+      { cat: "club", name: "ワシントンD.C.：ゴーゴー (カウベル / 生ベース)", tags: "Washington DC Go-Go cowbell rototoms live bass groove", bias: "Island Records go-go", mut: "global raw funk rhythm disciples", bpm: 95 },
+      { cat: "soul", name: "80s ポストディスコ / ダンスポップ", tags: "80s Post-Disco brass slap bass catchy vocal hook", bias: "ZE Records catalog", mut: "Japanese Wa-Boogie crossover", bpm: 118 },
+      { cat: "soul", name: "80s ミネアポリス・サウンド (電化ファンク)", tags: "80s Funk Minneapolis Sound LinnDrum gated synth", bias: "Paisley Park catalog", mut: "worldwide electro funk crossover", bpm: 122 },
+      { cat: "soul", name: "60s モータウン・サウンド (甘茶ソウル)", tags: "60s Motown melodic soul pop driving bass tambourine", bias: "Motown classic catalog", mut: "UK Northern Soul crossover", bpm: 128 },
+      { cat: "soul", name: "サザン・ソウル (Stax / 生ホーン＆ドラム)", tags: "60s Stax Southern Soul raw horn tight drum break", bias: "Stax Records catalog", mut: "British blues-soul disciples", bpm: 100 },
+      { cat: "soul", name: "チカーノ・ソウル (甘茶ローライダー)", tags: "Chicano Soul sweet ballad falsetto lowrider reverb", bias: "Rampart Records catalog", mut: "vintage Japanese sweet soul crossover", bpm: 72 },
+      { cat: "roots", name: "70s ジャズ・ファンク (ローズ / ワウギター)", tags: "70s Jazz Funk Fender Rhodes tight drum break blue note", bias: "Blue Note catalog", mut: "UK / European rare groove crossover", bpm: 102 }
+    ]
+  },
+  germany: {
+    label: "ドイツ (Germany)",
+    styles: [
+      { cat: "club", name: "フランクフルト：マイクロハウス (微細グルーヴ)", tags: "German Microhouse Minimal House glitch warm bassline", bias: "Playhouse Records Frankfurt", mut: "Romanian / French minimal house crossover", bpm: 124 },
+      { cat: "club", name: "パノラマバー・ディープハウス (ソウルフル)", tags: "Panorama Bar Deep House Rhodes chords hypnotic bassline", bias: "Ostgut Ton catalog", mut: "Chicago / London deep house crossover", bpm: 123 },
+      { cat: "club", name: "ハンブルク：メランコリック・ディープハウス", tags: "Hamburg Deep House Dial style melancholy piano lush reverb", bias: "Dial Records Hamburg", mut: "Tokyo / US atmospheric house", bpm: 120 },
+      { cat: "club", name: "ベルリン：ダブテクノ / ダブハウス", tags: "Dub Techno Basic Channel tape delay filtered chord stab sub", bias: "Basic Channel Chain Reaction", mut: "Detroit Echospace / Russian dub techno", bpm: 120 },
+      { cat: "club", name: "70s ミュンヘン・サウンド (モロダー調ディスコ)", tags: "Munich Sound Euro Disco Moroder synth bass strings", bias: "Musicland Studios catalog", mut: "Italo Disco / US Hi-NRG crossover", bpm: 124 },
+      { cat: "rock", name: "ジャーマン・パワーメタル (疾走2バス × ツインリード)", tags: "German Power Metal fast double bass melodic twin guitar", bias: "Noise Records catalog", mut: "Scandinavian / Japanese power metal", bpm: 155 },
+      { cat: "rock", name: "80s ジャーマン・メタル (Accept調 刻みリフ)", tags: "80s German Heavy Metal driving Marshall riff punchy snare", bias: "Brain Records catalog", mut: "NWOBHM / US speed metal crossover", bpm: 128 },
+      { cat: "rock", name: "ジャーマン・スラッシュ (Kreator調 高速)", tags: "German Thrash Metal aggressive fast drums chainsaw riff", bias: "Noise Records catalog", mut: "Bay Area / Brazilian thrash metal", bpm: 175 },
+      { cat: "rock", name: "NDH インダストリアル・メタル (重機4つ打ち)", tags: "Neue Deutsche Harte industrial metal heavy 4x4 stomp riff", bias: "Motor Music catalog", mut: "US industrial metal crossover", bpm: 120 },
+      { cat: "rock", name: "クラウトロック (モータリック・ビート)", tags: "German Krautrock motorik 4/4 drum repetitive groove", bias: "Brain Records catalog", mut: "UK post-punk / modern psych rock", bpm: 122 }
+    ]
+  },
+  argentina: {
+    label: "アルゼンチン (Argentina)",
+    styles: [
+      { cat: "club", name: "プログレッシブ・ハウス (叙情パッド × 低音)", tags: "Argentina Progressive House Sudbeat deep bassline melodic pads", bias: "Sudbeat Music catalog", mut: "UK / Bedrock progressive house crossover", bpm: 122 },
+      { cat: "club", name: "ブエノスアイレス・マイクロハウス (ミニマル)", tags: "Buenos Aires Microhouse minimal house stripped rolling sub", bias: "Savor Music catalog", mut: "Rominimal / Berlin microhouse crossover", bpm: 124 },
+      { cat: "club", name: "オーガニック・ハウス (アンデス民族楽器 × 4つ打ち)", tags: "Argentina Organic House Andean deep house charango flute kick", bias: "Shango Records catalog", mut: "Berlin / Tulum organic house crossover", bpm: 118 },
+      { cat: "club", name: "デジタル・クンビア (808重低音 × 土着リズム)", tags: "Argentina Digital Cumbia ZZK heavy 808 sub bass tropical groove", bias: "ZZK Records catalog", mut: "Mexican / Global bass hybrid", bpm: 96 },
+      { cat: "roots", name: "ヌエボ・タンゴ (ピアソラ調 / 劇的バンドネオン)", tags: "Argentina Nuevo Tango Piazzolla dramatic bandoneon bass tension", bias: "Milan Records tango", mut: "European jazz-tango crossover", bpm: 120 },
+      { cat: "rock", name: "70s ロック・ナシオナル (スピネッタ調ファズ)", tags: "70s Rock Nacional Spinetta poetic fuzz guitar jazz rock", bias: "Talent Microfon catalog", mut: "Italian / Canterbury prog rock crossover", bpm: 114 },
+      { cat: "roots", name: "フォルクローレ・ヌエボ (ボンボ大太鼓)", tags: "Argentina modern Folklore Bombo leguero deep wooden drum", bias: "Utopia records Argentina", mut: "global acoustic folk fusion", bpm: 90 }
+    ]
+  },
+  japan: {
+    label: "日本 (Japan)",
+    styles: [
+      { cat: "roots", name: "70s 和モノ・ジャズファンク / 刑事劇伴", tags: "Japanese 70s Jazz Funk rare groove drum break slap bass brass", bias: "Nippon Columbia vintage", mut: "US / French cinematic funk crossover", bpm: 110 },
+      { cat: "soul", name: "80s シティポップ / 和ブギー (スラップベース)", tags: "Japanese 80s City Pop funk Wa-Boogie slap bass brass", bias: "Alfa Records Japan", mut: "US modern funk / Vaporwave crossover", bpm: 116 },
+      { cat: "soul", name: "80s アイドル歌謡 (黄金期メガヒット)", tags: "Japanese 80s Idol Kayo lush brass analog synth catchy single", bias: "Victor Entertainment vintage", mut: "Korean K-City Pop crossover", bpm: 124 },
+      { cat: "soul", name: "90s 渋谷系 (ボッサ / ラウンジ / カットアップ)", tags: "Japanese 90s Shibuya-kei pastiche lounge bossa cut-up brass", bias: "Trattoria Records catalog", mut: "French / UK indie pop crossover", bpm: 118 },
+      { cat: "soul", name: "70s 昭和歌謡 / 和モノ・ソウル (生ドラム)", tags: "Japanese 70s Kayokyoku raw soul groove drum break strings", bias: "King Records Japan vintage", mut: "US deep soul crossover", bpm: 108 },
+      { cat: "club", name: "和製ディープハウス (寺田創一スタイル)", tags: "Japanese 90s Deep House Soichi Terada organ chord synth", bias: "Far East Recording", mut: "NYC / New Jersey house crossover", bpm: 122 },
+      { cat: "roots", name: "和ジャズ (スリー・ブラインド・マイス調)", tags: "Japanese 70s Jazz Three Blind Mice acoustic piano dynamic drums", bias: "Three Blind Mice TBM", mut: "European spiritual jazz crossover", bpm: 114 },
+      { cat: "roots", name: "和製オブสキュア・バレアリック (環境音楽)", tags: "Japanese 80s ambient ethno fusion minimal marimba synth", bias: "Non-Standard Records", mut: "European Balearic chillout crossover", bpm: 96 }
+    ]
+  },
+  nigeria_ghana: {
+    label: "西アフリカ (Nigeria & Ghana)",
+    styles: [
+      { cat: "roots", name: "70s アフロビート (トニー・アレン式ドラム)", tags: "Nigeria 70s Afrobeat Tony Allen heavy drum break horns", bias: "Soundway Records catalog", mut: "UK / NYC modern Afrobeat revival", bpm: 120 },
+      { cat: "rock", name: "70s アフロ・サイケファンク (Ofege/ファズ)", tags: "70s Nigeria Afro Rock Psychedelic Funk fuzz guitar drum break", bias: "Analog Africa catalog", mut: "global garage psych crossover", bpm: 122 },
+      { cat: "roots", name: "ヴィンテージ・ハイライフ (ガーナ / パームワイン)", tags: "Ghana Vintage Highlife palm-wine guitar interlocking brass swing", bias: "Essieie Records catalog", mut: "London West African highlife disciples", bpm: 115 }
+    ]
+  },
+  spain_ibiza: {
+    label: "スペイン & イビザ (Spain & Ibiza)",
+    styles: [
+      { cat: "club", name: "原初バレアリック・ビート (80s Amnesia スロー)", tags: "Ibiza 80s Balearic Beat Amnesia acoustic guitar warm synth", bias: "Café del Mar Music", mut: "Scandinavian / Italian Balearic crossover", bpm: 108 },
+      { cat: "club", name: "90s イビザ・ハウス (野外テラス / パーカッション)", tags: "90s Ibiza Progressive House tribal percussion piano terrace", bias: "Space Ibiza recordings", mut: "UK progressive house crossover", bpm: 128 },
+      { cat: "roots", name: "バレアリック・チルアウト (Café del Mar)", tags: "Ibiza Balearic chillout Spanish guitar lush pads sunset", bias: "Café del Mar Music", mut: "global sunset downtempo", bpm: 90 },
+      { cat: "rock", name: "フラメンコ・ロック / ルンバ (パルマ / ファズ)", tags: "Spanish Flamenco Rock fast palmas cajon flamenco guitar fuzz", bias: "Nuevos Medios catalog", mut: "Latin psych rock crossover", bpm: 115 }
+    ]
+  },
+  jamaica: {
+    label: "ジャマイカ (Jamaica)",
+    styles: [
+      { cat: "club", name: "キングストン・ダブ (ワンドロップ / エコー)", tags: "Kingston Dub deep sub bass tape delay spring reverb", bias: "Studio One catalog", mut: "UK / Berlin sound system dub", bpm: 72 },
+      { cat: "club", name: "ステッパーズ・ダブ (硬質4つ打ちミリタント)", tags: "Steppers Dub four-on-the-floor kick heavy militant bass horn", bias: "Blood and Fire catalog", mut: "UK Jah Shaka / French dub crossover", bpm: 130 },
+      { cat: "club", name: "90s デジタル・ダンスホール (カシオMT-40)", tags: "Jamaica 90s Digital Dancehall Casio MT-40 riddim", bias: "Greensleeves Records", mut: "London grime / reggaeton crossover", bpm: 96 },
+      { cat: "roots", name: "70s ルーツ・レゲエ (生音ラスタグルーヴ)", tags: "70s Roots Reggae live drum brass one-drop heavy bass", bias: "Trojan Records catalog", mut: "worldwide roots reggae disciples", bpm: 75 }
+    ]
+  },
+  brazil: {
+    label: "ブラジル (Brazil)",
+    styles: [
+      { cat: "roots", name: "フォホー・エレクトロニコ (電化アコーディオン)", tags: "Brazil Nordeste Forro Eletronico fast accordion synth bassline", bias: "Som Livre catalog", mut: "global tropical dance crossover", bpm: 125 },
+      { cat: "club", name: "バイリ・ファンキ / マンデラォン (808キック)", tags: "Brazil Baile Funk Mandelao raw 808 kick heavy sub vocal chop", bias: "KondZilla release", mut: "Lisbon Batida / Global club hybrid", bpm: 130 },
+      { cat: "soul", name: "サンバ・フュージョン / アジムス調 (エレピ)", tags: "Brazil Samba Funk Fusion Rhodes Arp synth slap bass groove", bias: "Far Out Recordings", mut: "London broken beat / jazz crossover", bpm: 112 },
+      { cat: "soul", name: "70s-80s MPB (国民的大衆ポップス)", tags: "Brazil MPB sophisticated chords lush acoustic guitar brass", bias: "Som Livre catalog", mut: "Japanese City Pop crossover", bpm: 102 },
+      { cat: "roots", name: "ボサ・ジャズ / サンバ・ジャズ (高速ピアノ)", tags: "Bossa Jazz Samba Jazz acoustic piano dynamic drums upright bass", bias: "Elenco Records", mut: "US West Coast jazz crossover", bpm: 135 }
+    ]
+  },
+  sweden_nordic: {
+    label: "スウェーデン & 北欧 (Sweden & Nordic)",
+    styles: [
+      { cat: "rock", name: "アクション・ロック / ガレージ (Hellacopters調)", tags: "Scandinavian Action Rock raw garage rock driving drums Marshall", bias: "Burning Heart Records", mut: "Detroit / Aussie action rock crossover", bpm: 135 },
+      { cat: "rock", name: "2000s ガレージ・パンク (The Hives調)", tags: "Swedish Garage Rock Revival dance-punk telecaster driving snare", bias: "Epitaph Europe", mut: "UK / US dance-punk crossover", bpm: 145 },
+      { cat: "rock", name: "イエテボリ・メロデス (ツインリード × 疾走)", tags: "Gothenburg Melodic Death Metal twin lead guitar blast beats", bias: "Nuclear Blast / Century Media", mut: "Finnish / US melodic death metal", bpm: 160 },
+      { cat: "rock", name: "ストックホルム・デスメタル (HM-2重爆撃)", tags: "Stockholm Death Metal chainsaw guitar HM-2 buzzsaw D-beat", bias: "Sunlight Studio output", mut: "worldwide HM-2 death metal disciples", bpm: 140 },
+      { cat: "club", name: "北欧スペース・ディスコ (白夜のアルペジオ)", tags: "Nordic Space Disco cosmic synthesizer arpeggio melodic 4/4", bias: "Full Pupp Records", mut: "German / Italian cosmic disco crossover", bpm: 120 }
+    ]
+  },
+  australia: {
+    label: "オーストラリア (Australia)",
+    styles: [
+      { cat: "club", name: "メルボルン・ディープハウス (ソウルフル生音)", tags: "Melbourne Deep House neo-soul jazz Rhodes live percussion", bias: "Future Classic catalog", mut: "London / West London broken beat crossover", bpm: 120 },
+      { cat: "club", name: "2000s オージー・ダンスポップ (フィルターハウス)", tags: "Australian Dance-Pop electro-pop filtered disco house synth", bias: "Modular Recordings", mut: "French Touch / UK dance-pop crossover", bpm: 126 },
+      { cat: "rock", name: "70s-80s オージー・パブロック (無骨な8ビート)", tags: "Australian Pub Rock raw guitar riff driving 8-beat live drums", bias: "Albert Productions", mut: "British / US bar band rock crossover", bpm: 122 },
+      { cat: "rock", name: "オージー・ネオサイケ (テープディレイ × ファズ)", tags: "Australian Neo-Psychedelia vintage fuzz guitar phasing drums", bias: "Flightless Records", mut: "US / UK modern psych rock crossover", bpm: 115 }
+    ]
+  },
+  portugal: {
+    label: "ポルトガル & アンゴラ (Portugal & Angola)",
+    styles: [
+      { cat: "club", name: "アンゴラ原初クドゥーロ (路上の歪みキック)", tags: "Angola Kuduro raw 4x4 distorted kick syncopation aggressive MC", bias: "Enchufada release", mut: "Lisbon / French Afro-club crossover", bpm: 140 },
+      { cat: "club", name: "リスボン：バティーダ (変則アフロポリリズム)", tags: "Lisbon Batida Kuduro polyrhythmic percussion raw syncopated bass", bias: "Principe Discos catalog", mut: "UK bass / global club music crossover", bpm: 130 },
+      { cat: "club", name: "タラシーニャ (超ヘヴィースロー・ベース)", tags: "Tarraxinha heavy slow sub bass sensual syncopated percussion", bias: "Principe Discos catalog", mut: "global slow bass / Kizomba crossover", bpm: 95 }
+    ]
+  },
+  east_africa: {
+    label: "東アフリカ (Uganda & Tanzania)",
+    styles: [
+      { cat: "club", name: "タンザニア：シンゲリ (超高速狂乱ビート)", tags: "Tanzania Singeli hyper-fast polyrhythm raw synth loop street", bias: "Nyege Nyege Tapes", mut: "European hardcore / speed club crossover", bpm: 200 },
+      { cat: "club", name: "ウガンダ：アチョリ・エレクトロ (マシンベース)", tags: "Uganda electronic Acholi wedding percussion hypnotic rhythm", bias: "Hakuna Kulala catalog", mut: "experimental global electronic", bpm: 140 }
+    ]
+  },
+  peru: {
+    label: "ペルー (Peru / Amazonian Psych)",
+    styles: [
+      { cat: "rock", name: "アマゾン・チーチャ (サイケ・クンビア / ファズ)", tags: "Peruvian Amazonian Chicha Psychedelic Cumbia fuzz surf guitar", bias: "Infopesa Peru catalog", mut: "US / Mexican psych cumbia crossover", bpm: 105 },
+      { cat: "roots", name: "アフロ・ペルーヴィアン (カホン変則リズム)", tags: "Afro-Peruvian festejo Cajon Quijada polyrhythmic acoustic", bias: "Discos Smith Peru", mut: "global acoustic percussion disciples", bpm: 110 }
+    ]
+  },
+  south_korea: {
+    label: "韓国 (South Korea / K-Groove)",
+    styles: [
+      { cat: "soul", name: "80s-90s K-City Pop (洗練スラップベース)", tags: "Korean City Pop funk slap bass lush synth nostalgic melody", bias: "Beatball Records", mut: "Japanese City Pop crossover", bpm: 116 },
+      { cat: "rock", name: "70s コリアン・サイケロック (ファズギター)", tags: "70s Korean Psychedelic Rock fuzz guitar organ drum break", bias: "Jigu Records vintage", mut: "US / British psych rock crossover", bpm: 115 },
+      { cat: "club", name: "ポンチャック・エレクトロ (反復ドラムマシン)", tags: "Korean Ppong-jjak electronic trot fast drum machine synth", bias: "Oasis Records Korea", mut: "global outsider electronic crossover", bpm: 135 }
+    ]
+  },
+  india: {
+    label: "インド (India / Bollywood Psych)",
+    styles: [
+      { cat: "roots", name: "70s ボリウッド・サイケファンク (変則タブラ)", tags: "70s Bollywood Psych Funk fuzzy guitar heavy tabla Moog brass", bias: "His Masters Voice India", mut: "UK Asian Underground crossover", bpm: 112 },
+      { cat: "club", name: "80s ボリウッド・ディスコ (エレクトロ)", tags: "80s Bollywood Electro Disco synth bass electronic kick vocal", bias: "T-Series vintage disco", mut: "Euro Disco / Italo crossover", bpm: 120 }
+    ]
+  },
+  france: {
+    label: "フランス (France)",
+    styles: [
+      { cat: "soul", name: "60s イエ・イエ (フレンチ・ポップ歌謡)", tags: "60s French Ye-Ye pop catchy female vocal groovy bass brass", bias: "Philips France vintage", mut: "Japanese Shibuya-kei crossover", bpm: 125 },
+      { cat: "soul", name: "70s フレンチ・ポップ / ゲンズブール調", tags: "French Pop Serge Gainsbourg lush strings slow bass acoustic", bias: "Barclay Records France", mut: "British trip-hop / cinematic pop crossover", bpm: 95 },
+      { cat: "club", name: "フレンチ・タッチ (フィルターハウス)", tags: "French Touch filtered disco house sidechain compression club", bias: "Roulé / Crydamoure", mut: "worldwide disco house disciples", bpm: 126 }
+    ]
+  },
+  italy_sound: {
+    label: "イタリア (Italy / Library & Italo)",
+    styles: [
+      { cat: "soul", name: "80s イタロ・ディスコ・ポップ (哀愁シンセ)", tags: "80s Italo Disco melodic pop synth arpeggio catchy chorus", bias: "Il Discotto catalog", mut: "German / Nordic cosmic disco crossover", bpm: 120 },
+      { cat: "roots", name: "70s イタリアン・ライブラリー (ワウギター)", tags: "Italian 70s Library Music wah guitar psych funk drum break", bias: "CAM Sugar catalog", mut: "US hip hop sampling crossover", bpm: 102 },
+      { cat: "fashion", name: "70s ジャッロ・サントラ (モリコーネ調)", tags: "Italian 70s Giallo soundtrack dramatic strings harpsichord", mut: "cinematic noir crossover", bpm: 100 }
+    ]
+  },
+  romania: {
+    label: "ルーマニア (Romania / Rominimal)",
+    styles: [
+      { cat: "club", name: "ロ・ミニマル (極微細パーカッション × 低域)", tags: "Romanian minimal house Rominimal subtle rolling sub micro click", bias: "[a:rpia:r] Records catalog", mut: "Berlin / Tokyo stripped-back micro groove", bpm: 125 },
+      { cat: "club", name: "モジュラー・ミニマル (変則アシッド)", tags: "Romania modular minimal techno syncopated clicks warm sub", bias: "Sunwaves recordings", mut: "worldwide modular minimal techno", bpm: 124 }
+    ]
+  },
+  mexico: {
+    label: "メキシコ (Mexico)",
+    styles: [
+      { cat: "club", name: "クンビア・ソニデラ (ピッチ落としスロー × エコー)", tags: "Mexican Cumbia Sonidera pitched-down slow sub space echo", bias: "Discos Peerless Fuentes", mut: "Argentine / US Latin bass hybrid", bpm: 90 },
+      { cat: "club", name: "メキシカン・クラブ・ベース (重低音トライバル)", tags: "Mexico City NAAFI heavy tribal percussion distorted bassline", mut: "NAAFI Mexico", mut: "Lisbon Batida / UK bass crossover", bpm: 130 },
+      { cat: "roots", name: "ソン・カロチョ (ハラーナ高速爪弾き)", tags: "Son Jarocho acoustic jarana fast strumming zapateado swing", bias: "Discos Corason", mut: "US Chicano folk crossover", bpm: 125 }
+    ]
+  },
+  cabo_verde: {
+    label: "カーボベルデ (Cabo Verde)",
+    styles: [
+      { cat: "roots", name: "フナナ (アコーディオン × 鉄棒打楽器フェホ)", tags: "Cabo Verde Funana fast accordion ferro iron percussion rhythm", bias: "Ostinato Records", mut: "Lisbon Afro-club crossover", bpm: 135 },
+      { cat: "roots", name: "コラデイラ (哀愁ガットギター × スウィング)", tags: "Cabo Verde Coladeira acoustic guitar cavaquinho swing vocal", bias: "Melodie Records", mut: "Portuguese fado / world acoustic", bpm: 105 }
+    ]
+  },
+  levant_palestine: {
+    label: "レバノン & パレスチナ (Levant / Dabke)",
+    styles: [
+      { cat: "club", name: "シャムステップ (伝統ダブケ × シンセベース)", tags: "Levantine Dabke Shamstep heavy synth bass darbuka mijwiz", bias: "Majazz Project", mut: "UK bass / European electronic dabke", bpm: 130 },
+      { cat: "roots", name: "エレクトロ・ダブケ (超高速ミジュウィズ笛)", tags: "Electro Dabke fast mijwiz reed horn heavy darbuka beat", bias: "47SOUL imprint", mut: "global club mutation crossover", bpm: 135 }
+    ]
+  },
+  algeria_france: {
+    label: "アルジェリア & 北アフリカ (Algeria / Raï)",
+    styles: [
+      { cat: "soul", name: "エレクトロ・ライ (砂漠ブルース歌謡 × シンセ)", tags: "Algeria Electro Rai microtonal synth drum machine Arabic vocal", bias: "Barclay Records Rai", mut: "French hip hop / club rai crossover", bpm: 115 },
+      { cat: "roots", name: "伝統クナーワ (グンブリ重低音 × カルカブ鉄)", tags: "Morocco Gnawa acoustic Guembri deep bass chant Qraqeb iron", bias: "Beehive Records Morocco", mut: "global trance / jazz fusion crossover", bpm: 105 }
+    ]
+  },
+  thailand_indonesia: {
+    label: "東南アジア (Thailand & Indonesia)",
+    styles: [
+      { cat: "soul", name: "タイ：ルクトゥン (田舎大衆歌謡ファンク)", tags: "Thailand Luk Thung brass groovy bass emotional vocal", bias: "Sublime Frequencies", mut: "global funk psych sampling crossover", bpm: 118 },
+      { cat: "soul", name: "インドネシア：シティ・ポップ / ポップ・クレアティフ", tags: "Indonesian Pop Kreatif slap bass sophisticated Rhodes jazz pop", bias: "Musica Studio's", mut: "Japanese City Pop crossover", bpm: 115 },
+      { cat: "rock", name: "タイ：モーラム・ロック (ケーン / ピン / ファンク)", tags: "Thailand Isan Molam funk rock khaen phin groovy rhythm", bias: "ZudRangMa Records", mut: "Western psych rock crossover", bpm: 128 }
+    ]
+  },
+  fashion_week: {
+    label: "世界5大都市コレクション (Fashion Week Runways)",
+    styles: [
+      { cat: "fashion", name: "パリ・コレクション (ダーク・ミニマル)", tags: "Paris Fashion Week dark chic minimal techno deep sleek bass", bias: "Pschent Music", mut: "Berlin industrial sleek crossover", bpm: 120 },
+      { cat: "fashion", name: "ミラノ・コレクション (官能ディープハウス)", tags: "Milan Fashion Week sensual deep house seductive bassline groove", bias: "Life and Death recordings", mut: "Italian dream house crossover", bpm: 122 },
+      { cat: "fashion", name: "ロンドン・コレクション (エレクトロクラッシュ)", tags: "London Fashion Week electroclash dance-punk synth driving beat", bias: "Moshi Moshi Records", mut: "Berlin / NYC electroclash crossover", bpm: 126 },
+      { cat: "fashion", name: "ニューヨーク・コレクション (モダン・ディスコ)", tags: "New York Fashion Week modern nu-disco high fashion strut", bias: "DFA Records", mut: "European nu-disco crossover", bpm: 114 },
+      { cat: "fashion", name: "東京コレクション (アヴァンギャルド音響)", tags: "Tokyo Fashion Week avant-garde electronica glitch sound pulse", bias: "Mule Musiq", mut: "UK experimental glitch crossover", bpm: 110 }
+    ]
+  }
+};
+
+let currentCountry = "south_africa";
+let currentStyleIdx = 0;
+
+const targetGrid = document.getElementById('target-grid');
+const targetBadge = document.getElementById('target-badge');
+
+const depthGrid = document.getElementById('depth-grid');
+const depthBadge = document.getElementById('depth-badge');
+
+const majorGrid = document.getElementById('major-grid');
+const majorBadge = document.getElementById('major-badge');
+
+const vocalGrid = document.getElementById('vocal-grid');
+const vocalBadge = document.getElementById('vocal-badge');
+
+const eraGrid = document.getElementById('era-grid');
+const eraBadge = document.getElementById('era-badge');
+
+const phaseSelect = document.getElementById('phase-select');
+const phaseBadge = document.getElementById('phase-badge');
+
+const countryTrigger = document.getElementById('country-trigger');
+const countryOptions = document.getElementById('country-options');
+
+const styleTrigger = document.getElementById('style-trigger');
+const styleOptions = document.getElementById('style-options');
+const catBadge = document.getElementById('cat-badge');
+
+const btnMutation = document.getElementById('btn-mutation');
+const mutationStatus = document.getElementById('mutation-status');
+
+const bpmInput = document.getElementById('bpm-input');
+const bpmIncBtn = document.getElementById('bpm-inc');
+const bpmDecBtn = document.getElementById('bpm-dec');
+const outputView = document.getElementById('output-view');
+const btnCopy = document.getElementById('btn-copy');
+const btnDownload = document.getElementById('btn-download');
+
+// サンプリングターゲットイベント
+targetGrid.querySelectorAll('.target-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    targetGrid.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTargetTag = btn.dataset.target;
+    targetBadge.textContent = btn.textContent;
+    renderPrompt();
+  });
+});
+
+// ディグ深度イベント（4段階）
+depthGrid.querySelectorAll('.depth-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    depthGrid.querySelectorAll('.depth-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDepthType = btn.dataset.depth;
+    depthBadge.textContent = btn.textContent;
+
+    if (currentDepthType === "MAJOR") {
+      depthBadge.style.color = "var(--oled-yellow)";
+      depthBadge.style.borderColor = "var(--oled-yellow)";
+    } else {
+      depthBadge.style.color = "var(--oled-green)";
+      depthBadge.style.borderColor = "var(--oled-green)";
+    }
+    renderPrompt();
+  });
+});
+
+// アーティスト / ボーカル属性イベント
+vocalGrid.querySelectorAll('.vocal-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    vocalGrid.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentVocalTag = btn.dataset.vocal;
+    vocalBadge.textContent = btn.textContent;
+    renderPrompt();
+  });
+});
+
+// 年代ボタンイベント
+eraGrid.querySelectorAll('.era-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.dataset.era;
+    const allBtn = eraGrid.querySelector('[data-era="ALL"]');
+
+    if (val === "ALL") {
+      selectedEras.clear();
+      eraGrid.querySelectorAll('.era-btn').forEach(b => b.classList.remove('active'));
+      allBtn.classList.add('active');
+    } else {
+      if (selectedEras.has(val)) {
+        selectedEras.delete(val);
+        btn.classList.remove('active');
+      } else {
+        selectedEras.add(val);
+        btn.classList.add('active');
+        allBtn.classList.remove('active');
+      }
+
+      if (selectedEras.size === 0) {
+        allBtn.classList.add('active');
+      }
+    }
+
+    updateEraBadge();
+    renderPrompt();
+  });
+});
+
+function updateEraBadge() {
+  if (selectedEras.size === 0) {
+    eraBadge.textContent = "ALL ERAS";
+  } else {
+    eraBadge.textContent = Array.from(selectedEras).join("/").toUpperCase();
+  }
+}
+
+// 他国飛び火（Mutation）トグル
+btnMutation.addEventListener('click', () => {
+  isMutationOn = !isMutationOn;
+  if (isMutationOn) {
+    btnMutation.classList.add('active');
+    mutationStatus.textContent = "ON (CROSS-BORDER)";
+    mutationStatus.style.color = "var(--oled-green)";
+  } else {
+    btnMutation.classList.remove('active');
+    mutationStatus.textContent = "OFF (PURE LOCAL)";
+    mutationStatus.style.color = "var(--text-dim)";
+  }
+  renderPrompt();
+});
+
+function buildCountryDropdown() {
+  countryOptions.innerHTML = '';
+  Object.keys(COUNTRY_VAULT).forEach(key => {
+    const item = document.createElement('div');
+    item.className = 'menu-item' + (key === currentCountry ? ' selected' : '');
+    item.textContent = COUNTRY_VAULT[key].label;
+    item.addEventListener('click', () => {
+      currentCountry = key;
+      currentStyleIdx = 0;
+      countryTrigger.textContent = COUNTRY_VAULT[key].label;
+      countryOptions.classList.remove('open');
+      buildStyleDropdown();
+    });
+    countryOptions.appendChild(item);
+  });
+  countryTrigger.textContent = COUNTRY_VAULT[currentCountry].label;
+}
+
+function buildStyleDropdown() {
+  styleOptions.innerHTML = '';
+  const styles = COUNTRY_VAULT[currentCountry].styles;
+  const grouped = { club: [], soul: [], rock: [], roots: [], fashion: [], any: [] };
+
+  styles.forEach((s, idx) => {
+    if (grouped[s.cat]) {
+      grouped[s.cat].push({ ...s, idx });
+    }
+  });
+
+  Object.keys(CATEGORIES).forEach(catKey => {
+    const list = grouped[catKey];
+    if (list && list.length > 0) {
+      const header = document.createElement('div');
+      header.className = 'menu-group-header';
+      header.style.color = CATEGORIES[catKey].hex;
+      header.textContent = `■ ${CATEGORIES[catKey].label}`;
+      styleOptions.appendChild(header);
+
+      list.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'menu-item' + (item.idx === currentStyleIdx ? ' selected' : '');
+        row.innerHTML = `<span class="dot" style="background-color:${CATEGORIES[catKey].hex}"></span><span>${item.name}</span>`;
+        row.addEventListener('click', () => {
+          currentStyleIdx = item.idx;
+          styleOptions.classList.remove('open');
+          updateSelection();
+        });
+        styleOptions.appendChild(row);
+      });
+    }
+  });
+
+  updateSelection();
+}
+
+function updateSelection() {
+  const item = COUNTRY_VAULT[currentCountry].styles[currentStyleIdx];
+  const cat = CATEGORIES[item.cat];
+
+  styleTrigger.innerHTML = `<span class="dot" style="background-color:${cat.hex}"></span> <span style="margin-left:6px; color:#ffffff;">${item.name}</span>`;
+  styleTrigger.style.borderColor = cat.hex;
+
+  catBadge.textContent = cat.label;
+  catBadge.style.color = cat.hex;
+  catBadge.style.border = `1px solid ${cat.hex}`;
+
+  bpmInput.value = item.bpm;
+  renderPrompt();
+}
+
+function renderPrompt() {
+  const item = COUNTRY_VAULT[currentCountry].styles[currentStyleIdx];
+  const bpm = Number(bpmInput.value || item.bpm);
+  const phaseVal = phaseSelect.value;
+  const rules = [];
+
+  // GEMINI DIGGER ENGINE v1
+  // Gemini-origin COUNTRY_VAULT is source data only and is never rewritten here.
+  // Goal: broad discovery first, then deep digging inside the selected musical area.
+  let opening = `Deep-research real, verifiable tracks for ${item.tags}`;
+
+  // Preserve Gemini-origin discovery metadata as research context.
+  const context = [];
+  if (item.bias) context.push(item.bias);
+  if (isMutationOn && item.mut) context.push(item.mut);
+  if (context.length) opening += `, using ${context.join(" and ")} as scene context`;
+  opening += ".";
+  rules.push(opening);
+
+  if (currentTargetTag) {
+    const targetMap = {
+      "open live acoustic drum break solo, no music intro": "Prioritize tracks with prominent open drum breaks.",
+      "isolated drum one-shot": "Prioritize tracks with distinctive drum one-shots.",
+      "rhodes chord progression loop": "Prioritize tracks with prominent Rhodes or chord loops.",
+      "unfiltered dry bassline loop": "Prioritize tracks with prominent dry basslines.",
+      "vocal phrase chop": "Prioritize tracks with prominent vocal chops."
+    };
+    rules.push(targetMap[currentTargetTag] || `Prioritize tracks featuring ${currentTargetTag}.`);
+  }
+
+  if (currentVocalTag) {
+    const vocalMap = {
+      "male vocalists": "Prefer male vocals.",
+      "female vocalists": "Prefer female vocals.",
+      "instrumental only, no vocals": "Use instrumental or lyric-free tracks."
+    };
+    rules.push(vocalMap[currentVocalTag] || `Prefer ${currentVocalTag}.`);
+  }
+
+  if (selectedEras.size > 0) {
+    const eraMap = {"60s":"the '60s","70s":"the '70s","80s":"the '80s","90s":"the '90s","2000s":"the '00s","modern":"current releases"};
+    const eras = Array.from(selectedEras).map(e => eraMap[e] || e);
+    rules.push(`Focus on music from ${eras.join(" and ")}.`);
+  }
+
+  // CRATE DEPTH and MAJOR PRESENCE describe digging direction, not hard catalog filters.
+  if (currentMajorPresence === "DEKAMORI") {
+    rules.push("Focus on era-defining, iconic and widely recognized tracks within this exact scene.");
+  } else if (currentMajorPresence === "MAIN") {
+    rules.push("Use recognizable scene essentials as the backbone, with deeper cuts around them.");
+  } else {
+    if (currentDepthType === "MAJOR") {
+      rules.push("Favor established scene essentials.");
+    } else if (currentDepthType === "UNDERGROUND") {
+      rules.push("Dig into deeper underground cuts.");
+    } else if (currentDepthType === "OBSCURE") {
+      rules.push("Dig for hidden gems, obscure releases and deeper cuts.");
+    }
+
+    if (currentMajorPresence === "ACCENT") {
+      rules.push("Add a few recognizable scene anchors.");
+    } else if (currentMajorPresence === "MIX") {
+      rules.push("Balance recognizable scene tracks with deeper cuts.");
+    }
+  }
+
+  // Taste direction is phrased for Gemini research, not Spotify personalization.
+  if (currentTasteBias === "MY") {
+    rules.push("Stay close to the selected musical direction rather than forcing novelty.");
+  } else if (currentTasteBias === "BALANCED") {
+    rules.push("Balance familiar scene references with discoveries.");
+  } else if (currentTasteBias === "NEW") {
+    rules.push("Prioritize discoveries beyond the obvious names in this scene.");
+  }
+
+  if (currentFreshness === "LESS") {
+    rules.push("Prefer less obvious and less repeatedly surfaced selections.");
+  } else if (currentFreshness === "UNHEARD") {
+    rules.push("Prioritize unfamiliar discoveries and avoid the most obvious staples.");
+  }
+
+  // BPM is intentionally soft: the selected subgenre remains the primary musical constraint.
+  if (bpmRange === 3) {
+    rules.push(`Use ${bpm} BPM as a tight tempo reference, but do not reject an authentic track solely for BPM.`);
+  } else if (bpmRange === 8) {
+    rules.push(`Use ${bpm} BPM as a loose tempo reference; subgenre authenticity comes first.`);
+  } else {
+    rules.push(`Use ${bpm} BPM as a soft tempo reference; subgenre authenticity comes first.`);
+  }
+
+  if (phaseVal === "none") rules.push("Favor tracks that can form a warm-up to peak to comedown DJ arc.");
+  else if (phaseVal === "warmup") rules.push("Favor a steady warm-up role.");
+  else if (phaseVal === "buildup") rules.push("Favor tracks that build energy gradually.");
+  else if (phaseVal === "peak") rules.push("Favor peak-time energy.");
+  else if (phaseVal === "afterhours") rules.push("Favor a late-night after-hours role.");
+
+  // Return a candidate crate for later Spotify verification.
+  rules.push("Find 24 strong candidate tracks. Use each artist once.");
+  rules.push("Verify that every Artist - Track pairing is real. Return only Artist - Track, one per line.");
+
+  const phaseLabels = { none: "16-BANK ARC", warmup: "WARM UP", buildup: "BUILD UP", peak: "PEAK TIME", afterhours: "AFTERHOURS" };
+  phaseBadge.textContent = phaseLabels[phaseVal];
+  outputView.textContent = rules.join(" ");
+}
+// BPMレンジ：DJで繋ぎやすい近似テンポを優先（素材・ジャンル範囲は変更しない）
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    bpmRange = Number(btn.dataset.range);
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', b === btn));
+    renderPrompt();
+  });
+});
+
+// ドロップダウン開閉
+countryTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  countryOptions.classList.toggle('open');
+  styleOptions.classList.remove('open');
+});
+styleTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  styleOptions.classList.toggle('open');
+  countryOptions.classList.remove('open');
+});
+document.addEventListener('click', () => {
+  countryOptions.classList.remove('open');
+  styleOptions.classList.remove('open');
+});
+
+phaseSelect.addEventListener('change', renderPrompt);
+bpmInput.addEventListener('input', renderPrompt);
+
+bpmIncBtn.addEventListener('click', () => {
+  bpmInput.value = parseInt(bpmInput.value, 10) + 5;
+  renderPrompt();
+});
+bpmDecBtn.addEventListener('click', () => {
+  bpmInput.value = Math.max(40, parseInt(bpmInput.value, 10) - 5);
+  renderPrompt();
+});
+
+// コピー処理
+btnCopy.addEventListener('click', () => {
+  const text = outputView.textContent;
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'absolute';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, 99999);
+  document.execCommand('copy');
+  document.body.removeChild(textarea);
+
+  btnCopy.textContent = "COPIED TO CLIPBOARD!";
+  btnCopy.style.background = "linear-gradient(180deg, #2ed573 0%, #26af5f 100%)";
+  setTimeout(() => {
+    btnCopy.textContent = "プロンプトをコピー";
+    btnCopy.style.background = "linear-gradient(180deg, #ff5252 0%, #d63031 100%)";
+  }, 1000);
+});
+
+// HTML自己保存
+btnDownload.addEventListener('click', () => {
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'diggers_vault_mk6_gemini_digger_engine_v1.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// MAJOR PRESENCE — 認知度のある曲をセット内でどう使うか
+majorGrid.querySelectorAll('.major-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    majorGrid.querySelectorAll('.major-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMajorPresence = btn.dataset.major;
+    majorBadge.textContent = btn.textContent;
+    renderPrompt();
+  });
+});
+
+
+// TASTE BIAS — Spotify personalization direction, controlled only by buttons
+document.querySelectorAll('[data-taste]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTasteBias = btn.dataset.taste;
+    document.querySelectorAll('[data-taste]').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('taste-badge').textContent = currentTasteBias === 'MY' ? 'MY TASTE' : currentTasteBias === 'NEW' ? 'NEW TERRITORY' : 'BALANCED';
+    renderPrompt();
+  });
+});
+
+// FRESHNESS — replay-history pressure without free-text input
+document.querySelectorAll('[data-fresh]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentFreshness = btn.dataset.fresh;
+    document.querySelectorAll('[data-fresh]').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('fresh-badge').textContent = currentFreshness === 'LESS' ? 'LESS PLAYED' : currentFreshness === 'UNHEARD' ? 'UNHEARD' : 'ANY';
+    renderPrompt();
+  });
+});
+
+// Copy this self-contained HTML source for review / handoff.
+document.getElementById('btn-code').addEventListener('click', async () => {
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  try {
+    await navigator.clipboard.writeText(fullHtml);
+    const b = document.getElementById('btn-code');
+    const old = b.textContent; b.textContent = 'COPIED HTML';
+    setTimeout(() => b.textContent = old, 1200);
+  } catch (e) {
+    const ta = document.createElement('textarea'); ta.value = fullHtml; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+});
+
+buildCountryDropdown();
+buildStyleDropdown();
+
+
+// === GEMINI RESULT IN v2 ===
+const geminiResultInput = document.getElementById("gemini-result-input");
+const parseGeminiBtn = document.getElementById("parse-gemini-result");
+const clearGeminiBtn = document.getElementById("clear-gemini-result");
+const parseStatus = document.getElementById("parse-status");
+const candidateCrate = document.getElementById("candidate-crate");
+
+let geminiCandidates = [];
+
+function normalizeDashLine(line) {
+  return line
+    .replace(/^\s*(?:[-*•]\s*|\d+\s*[.)]\s*)/, "")
+    .replace(/\s+[–—]\s+/g, " - ")
+    .trim();
+}
+
+function parseGeminiLine(line, index) {
+  const cleaned = normalizeDashLine(line);
+  if (!cleaned) return null;
+
+  // Contract is Artist - Track. Split only on a spaced hyphen so hyphens inside names survive.
+  const sep = cleaned.indexOf(" - ");
+  if (sep <= 0 || sep >= cleaned.length - 3) {
+    return { index, raw: line, valid: false, artist: "", track: "", artists: [] };
+  }
+
+  const artist = cleaned.slice(0, sep).trim();
+  const track = cleaned.slice(sep + 3).trim();
+  if (!artist || !track) {
+    return { index, raw: line, valid: false, artist, track, artists: [] };
+  }
+
+  // For duplicate detection, treat "&", "feat.", "featuring", "x", and comma as collaborators.
+  // This does NOT alter the display artist string used later for Spotify Search.
+  const artists = artist
+    .split(/\s+(?:&|x|feat\.?|ft\.?|featuring)\s+|,\s*/i)
+    .map(a => a.trim())
+    .filter(Boolean);
+
+  return { index, raw: line, valid: true, artist, track, artists };
+}
+
+function artistKey(name) {
+  return name.normalize("NFKC").toLowerCase().replace(/[.'’]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function analyzeCandidates(parsed) {
+  const seen = new Map();
+  for (const c of parsed.filter(x => x.valid)) {
+    c.duplicateArtists = [];
+    for (const a of c.artists) {
+      const key = artistKey(a);
+      if (seen.has(key)) {
+        c.duplicateArtists.push(a);
+        const first = seen.get(key);
+        if (!first.duplicateArtists.includes(a)) first.duplicateArtists.push(a);
+      } else {
+        seen.set(key, c);
+      }
+    }
+  }
+  return parsed;
+}
+
+function renderCandidateCrate() {
+  candidateCrate.innerHTML = "";
+  const valid = geminiCandidates.filter(c => c.valid);
+  const invalid = geminiCandidates.filter(c => !c.valid);
+  const dupRows = valid.filter(c => c.duplicateArtists && c.duplicateArtists.length);
+
+  parseStatus.textContent =
+    `${valid.length} CANDIDATES · ${invalid.length} INVALID · ${dupRows.length} DUPLICATE-ARTIST ROWS`;
+
+  valid.forEach((c, i) => {
+    const row = document.createElement("div");
+    row.style.cssText = "padding:9px 0;border-bottom:1px solid rgba(255,255,255,.09);font-size:13px;line-height:1.4;";
+    const dup = c.duplicateArtists?.length
+      ? ` <span style="opacity:.75">[DUP: ${c.duplicateArtists.join(", ")}]</span>`
+      : "";
+    row.innerHTML = `<span style="opacity:.55">${String(i+1).padStart(2,"0")}</span> ` +
+      `<strong>${escapeHtml(c.artist)}</strong> — ${escapeHtml(c.track)}${dup}`;
+    candidateCrate.appendChild(row);
+  });
+
+  if (invalid.length) {
+    const bad = document.createElement("div");
+    bad.style.cssText = "margin-top:12px;padding:10px;border:1px solid #5b3a3a;border-radius:7px;font-size:12px;";
+    bad.innerHTML = `<strong>UNPARSED ${invalid.length}</strong><br>` +
+      invalid.map(x => escapeHtml(x.raw)).join("<br>");
+    candidateCrate.appendChild(bad);
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[ch]));
+}
+
+function parseGeminiResult() {
+  const lines = geminiResultInput.value.split(/\r?\n/).filter(line => line.trim());
+  geminiCandidates = analyzeCandidates(lines.map((line, i) => parseGeminiLine(line, i)).filter(Boolean));
+  renderCandidateCrate();
+  try {
+    localStorage.setItem("diggersVaultGeminiResult", geminiResultInput.value);
+  } catch (_) {}
+}
+
+parseGeminiBtn.addEventListener("click", parseGeminiResult);
+clearGeminiBtn.addEventListener("click", () => {
+  geminiResultInput.value = "";
+  geminiCandidates = [];
+  candidateCrate.innerHTML = "";
+  parseStatus.textContent = "WAITING FOR GEMINI RESULT";
+  try { localStorage.removeItem("diggersVaultGeminiResult"); } catch (_) {}
+});
+
+try {
+  const savedGeminiResult = localStorage.getItem("diggersVaultGeminiResult");
+  if (savedGeminiResult) {
+    geminiResultInput.value = savedGeminiResult;
+    parseGeminiResult();
+  }
+} catch (_) {}
+
+
+
+// === SPOTIFY VERIFY v3 — Authorization Code with PKCE ===
+const spotifyClientIdInput = document.getElementById("spotify-client-id");
+const spotifyRedirectInput = document.getElementById("spotify-redirect-uri");
+const spotifyConnectBtn = document.getElementById("spotify-connect");
+const spotifyVerifyBtn = document.getElementById("spotify-verify");
+const spotifyDisconnectBtn = document.getElementById("spotify-disconnect");
+const spotifyStatus = document.getElementById("spotify-status");
+const spotifyVerifyResults = document.getElementById("spotify-verify-results");
+
+const SPOTIFY_AUTH = "https://accounts.spotify.com/authorize";
+const SPOTIFY_TOKEN = "https://accounts.spotify.com/api/token";
+const SPOTIFY_API = "https://api.spotify.com/v1";
+
+function spotifyRandomString(length=64) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const values = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(values, x => chars[x % chars.length]).join("");
+}
+async function spotifySha256(plain) {
+  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(plain));
+}
+function spotifyBase64Url(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
+}
+function saveSpotifySettings() {
+  localStorage.setItem("dv_spotify_client_id", spotifyClientIdInput.value.trim());
+  localStorage.setItem("dv_spotify_redirect_uri", spotifyRedirectInput.value.trim());
+}
+function spotifyToken() {
+  return localStorage.getItem("dv_spotify_access_token") || "";
+}
+function setSpotifyConnectedUI() {
+  const connected = !!spotifyToken();
+  spotifyVerifyBtn.disabled = !connected;
+  spotifyStatus.textContent = connected ? "SPOTIFY CONNECTED · READY TO VERIFY" : "NOT CONNECTED";
+}
+async function spotifyConnect() {
+  const clientId = spotifyClientIdInput.value.trim();
+  const redirectUri = spotifyRedirectInput.value.trim();
+  if (!clientId || !redirectUri) {
+    spotifyStatus.textContent = "CLIENT ID / REDIRECT URI REQUIRED";
+    return;
+  }
+  saveSpotifySettings();
+
+  const verifier = spotifyRandomString(64);
+  const challenge = spotifyBase64Url(await spotifySha256(verifier));
+  const state = spotifyRandomString(24);
+  sessionStorage.setItem("dv_spotify_code_verifier", verifier);
+  sessionStorage.setItem("dv_spotify_state", state);
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: "code",
+    redirect_uri: redirectUri,
+    code_challenge_method: "S256",
+    code_challenge: challenge,
+    state
+  });
+  window.location.href = `${SPOTIFY_AUTH}?${params.toString()}`;
+}
+async function spotifyHandleCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const error = params.get("error");
+  if (error) {
+    spotifyStatus.textContent = `SPOTIFY AUTH ERROR: ${error}`;
+    return;
+  }
+  if (!code) return;
+
+  const expectedState = sessionStorage.getItem("dv_spotify_state");
+  const returnedState = params.get("state");
+  if (!expectedState || returnedState !== expectedState) {
+    spotifyStatus.textContent = "SPOTIFY AUTH ERROR: STATE MISMATCH";
+    return;
+  }
+
+  const clientId = localStorage.getItem("dv_spotify_client_id") || "";
+  const redirectUri = localStorage.getItem("dv_spotify_redirect_uri") || "";
+  const verifier = sessionStorage.getItem("dv_spotify_code_verifier") || "";
+  spotifyStatus.textContent = "CONNECTING TO SPOTIFY…";
+
+  const response = await fetch(SPOTIFY_TOKEN, {
+    method: "POST",
+    headers: {"Content-Type":"application/x-www-form-urlencoded"},
+    body: new URLSearchParams({
+      client_id: clientId,
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: redirectUri,
+      code_verifier: verifier
+    })
+  });
+  const data = await response.json();
+  if (!response.ok || !data.access_token) {
+    spotifyStatus.textContent = `TOKEN ERROR ${response.status}`;
+    return;
+  }
+
+  localStorage.setItem("dv_spotify_access_token", data.access_token);
+  if (data.refresh_token) localStorage.setItem("dv_spotify_refresh_token", data.refresh_token);
+  localStorage.setItem("dv_spotify_expires_at", String(Date.now() + (data.expires_in || 3600) * 1000));
+
+  sessionStorage.removeItem("dv_spotify_code_verifier");
+  sessionStorage.removeItem("dv_spotify_state");
+  history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+  setSpotifyConnectedUI();
+}
+function spotifyDisconnect() {
+  ["dv_spotify_access_token","dv_spotify_refresh_token","dv_spotify_expires_at"].forEach(k => localStorage.removeItem(k));
+  spotifyVerifyResults.innerHTML = "";
+  setSpotifyConnectedUI();
+}
+function spotifyNormalize(s) {
+  return String(s || "").normalize("NFKC").toLowerCase()
+    .replace(/[’‘]/g,"'").replace(/[“”]/g,'"')
+    .replace(/\s+/g," ").trim();
+}
+function spotifyScore(candidate, item) {
+  const targetTrack = spotifyNormalize(candidate.track);
+  const targetArtists = candidate.artists.map(spotifyNormalize);
+  const gotTrack = spotifyNormalize(item.name);
+  const gotArtists = (item.artists || []).map(a => spotifyNormalize(a.name));
+
+  let score = 0;
+  if (gotTrack === targetTrack) score += 70;
+  else if (gotTrack.includes(targetTrack) || targetTrack.includes(gotTrack)) score += 35;
+
+  const artistMatches = targetArtists.filter(a => gotArtists.includes(a)).length;
+  score += Math.min(30, artistMatches * 15);
+  if (targetArtists.length && artistMatches === targetArtists.length) score += 10;
+  return score;
+}
+async function spotifySearchCandidate(candidate) {
+  const q = `track:${candidate.track} artist:${candidate.artist}`;
+  const url = `${SPOTIFY_API}/search?` + new URLSearchParams({
+    q, type:"track", market:"JP", limit:"10"
+  });
+  const response = await fetch(url, {
+    headers: {Authorization:`Bearer ${spotifyToken()}`}
+  });
+  if (response.status === 401) throw new Error("AUTH_EXPIRED");
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  const data = await response.json();
+  const items = data.tracks?.items || [];
+  const ranked = items.map(item => ({item, score:spotifyScore(candidate,item)}))
+                      .sort((a,b) => b.score - a.score);
+  const best = ranked[0] || null;
+  // 85+ means exact title plus at least one exact artist in ordinary cases.
+  return {candidate, best, verified: !!best && best.score >= 85, alternatives: ranked.slice(0,3)};
+}
+function renderSpotifyVerifyResults(results) {
+  spotifyVerifyResults.innerHTML = "";
+  const verified = results.filter(r => r.verified).length;
+  const review = results.length - verified;
+  spotifyStatus.textContent = `${verified} VERIFIED · ${review} REVIEW`;
+
+  results.forEach((r,i) => {
+    const row = document.createElement("div");
+    row.style.cssText = "padding:9px 0;border-bottom:1px solid rgba(255,255,255,.09);font-size:13px;line-height:1.45;";
+    const c = r.candidate;
+    if (!r.best) {
+      row.innerHTML = `<span style="opacity:.55">${String(i+1).padStart(2,"0")}</span> ` +
+        `<strong>${escapeHtml(c.artist)}</strong> — ${escapeHtml(c.track)} ` +
+        `<span style="opacity:.7">[NOT FOUND]</span>`;
+    } else {
+      const item = r.best.item;
+      const artists = (item.artists || []).map(a=>a.name).join(" & ");
+      const mark = r.verified ? "✓ VERIFIED" : "△ REVIEW";
+      row.innerHTML = `<span style="opacity:.55">${String(i+1).padStart(2,"0")}</span> ` +
+        `<strong>${escapeHtml(c.artist)}</strong> — ${escapeHtml(c.track)}<br>` +
+        `<span style="opacity:.72">${mark} · ${escapeHtml(artists)} — ${escapeHtml(item.name)} · SCORE ${r.best.score}</span>`;
+      r.spotifyTrackId = item.id;
+      r.spotifyUri = item.uri;
+    }
+    spotifyVerifyResults.appendChild(row);
+  });
+
+  window.spotifyVerifiedCandidates = results;
+}
+async function spotifyVerifyCandidates() {
+  const valid = geminiCandidates.filter(c => c.valid);
+  if (!valid.length) {
+    spotifyStatus.textContent = "PARSE GEMINI RESULT FIRST";
+    return;
+  }
+  if (!spotifyToken()) {
+    spotifyStatus.textContent = "CONNECT SPOTIFY FIRST";
+    return;
+  }
+  spotifyVerifyBtn.disabled = true;
+  spotifyVerifyResults.innerHTML = "";
+  const results = [];
+  for (let i=0; i<valid.length; i++) {
+    spotifyStatus.textContent = `VERIFYING ${i+1}/${valid.length}…`;
+    try {
+      results.push(await spotifySearchCandidate(valid[i]));
+    } catch (e) {
+      if (e.message === "AUTH_EXPIRED") {
+        spotifyStatus.textContent = "SPOTIFY SESSION EXPIRED · CONNECT AGAIN";
+        spotifyVerifyBtn.disabled = false;
+        return;
+      }
+      results.push({candidate:valid[i], best:null, verified:false, error:e.message});
+    }
+  }
+  renderSpotifyVerifyResults(results);
+  spotifyVerifyBtn.disabled = false;
+}
+
+spotifyConnectBtn.addEventListener("click", spotifyConnect);
+spotifyVerifyBtn.addEventListener("click", spotifyVerifyCandidates);
+spotifyDisconnectBtn.addEventListener("click", spotifyDisconnect);
+
+spotifyClientIdInput.value = localStorage.getItem("dv_spotify_client_id") || "";
+spotifyRedirectInput.value = localStorage.getItem("dv_spotify_redirect_uri") || "";
+setSpotifyConnectedUI();
+spotifyHandleCallback().catch(err => {
+  spotifyStatus.textContent = `SPOTIFY AUTH ERROR: ${err.message}`;
+});
+
+</script>
+
+<div id="offlineStandaloneBadge" style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:7px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(7,10,14,.88);backdrop-filter:blur(10px);font:600 10px/1.1 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.12em;color:#aeb8c5;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.28)">SPOTIFY DIRECT / OFFLINE</div>
+</body></html>
