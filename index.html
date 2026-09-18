@@ -1094,7 +1094,7 @@ body{
 <div class="vault-chassis">
 <div class="machine-header">
 <div class="brand-title">DIGGER'S VAULT PRO</div>
-<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v4</div>
+<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v4.1</div>
 </div>
 <!-- 1. サンプリング・ターゲット指定 -->
 
@@ -1238,6 +1238,21 @@ body{
   </div>
   <div id="parse-status" style="margin-top:10px;font-size:13px;opacity:.85;">WAITING FOR GEMINI RESULT</div>
   <div id="candidate-crate" style="margin-top:12px;"></div>
+  <div id="final-crate-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
+    <div class="section-title">FINAL CRATE</div>
+    <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
+      Spotify検証結果から最終16曲を選択。VERIFY後はVERIFIED曲を上から最大16曲まで自動投入します。
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <button type="button" id="final-auto">AUTO 16</button>
+      <button type="button" id="final-clear">CLEAR CRATE</button>
+      <button type="button" id="final-redig">COPY RE-DIG</button>
+    </div>
+    <div id="final-status" style="margin-top:10px;font-size:13px;opacity:.85;">0 / 16 TRACKS</div>
+    <div id="final-crate" style="margin-top:12px;"></div>
+    <div id="final-pool" style="margin-top:16px;"></div>
+  </div>
+
   <div id="spotify-verify-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
     <div class="section-title">SPOTIFY VERIFY</div>
     <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
@@ -1256,20 +1271,7 @@ body{
     <div id="spotify-verify-results" style="margin-top:12px;"></div>
   </div>
 
-  <div id="final-crate-panel" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
-    <div class="section-title">FINAL CRATE</div>
-    <div style="font-size:12px;line-height:1.5;opacity:.78;margin-bottom:10px;">
-      Spotify検証結果から最終16曲を選択。VERIFY後はVERIFIED曲を上から最大16曲まで自動投入します。
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <button type="button" id="final-auto">AUTO 16</button>
-      <button type="button" id="final-clear">CLEAR CRATE</button>
-      <button type="button" id="final-redig">COPY RE-DIG</button>
-    </div>
-    <div id="final-status" style="margin-top:10px;font-size:13px;opacity:.85;">0 / 16 TRACKS</div>
-    <div id="final-crate" style="margin-top:12px;"></div>
-    <div id="final-pool" style="margin-top:16px;"></div>
-  </div>
+
 </section>
 
 <script>
@@ -2353,7 +2355,7 @@ async function spotifyVerifyCandidates() {
 }
 
 
-// === FINAL CRATE v4 ===
+// === FINAL CRATE v4.1 ===
 const finalCrateEl = document.getElementById("final-crate");
 const finalPoolEl = document.getElementById("final-pool");
 const finalStatusEl = document.getElementById("final-status");
@@ -2386,6 +2388,7 @@ function finalCrateLoadFromVerify(results) {
   finalCrate = finalVerifyResults.filter(r => r.verified && r.spotifyTrackId).slice(0,16);
   finalSave();
   renderFinalCrate();
+  requestAnimationFrame(() => document.getElementById("final-crate-panel")?.scrollIntoView({behavior:"smooth", block:"start"}));
 }
 function finalAdd(index) {
   const r = finalVerifyResults[index];
