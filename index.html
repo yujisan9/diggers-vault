@@ -1094,7 +1094,7 @@ body{
 <div class="vault-chassis">
 <div class="machine-header">
 <div class="brand-title">DIGGER'S VAULT PRO</div>
-<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v5.0</div>
+<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v5.1 · CLEAN START</div>
 </div>
 <!-- 1. サンプリング・ターゲット指定 -->
 
@@ -1120,13 +1120,13 @@ body{
 <div class="control-block">
 <div class="block-label"><span>1. COUNTRY / TERRITORY <small>/ 国・地域</small></span></div>
 <div class="custom-wrapper" id="country-wrapper">
-<div class="custom-trigger" id="country-trigger">南アフリカ (South Africa / Amapiano &amp; House)</div>
+<div class="custom-trigger" id="country-trigger">選んでください</div>
 <div class="custom-menu" id="country-options"><div class="menu-item selected">南アフリカ (South Africa / Amapiano &amp; House)</div><div class="menu-item">イギリス (United Kingdom)</div><div class="menu-item">アメリカ (United States)</div><div class="menu-item">ドイツ (Germany)</div><div class="menu-item">アルゼンチン (Argentina)</div><div class="menu-item">日本 (Japan)</div><div class="menu-item">西アフリカ (Nigeria &amp; Ghana)</div><div class="menu-item">スペイン &amp; イビザ (Spain &amp; Ibiza)</div><div class="menu-item">ジャマイカ (Jamaica)</div><div class="menu-item">ブラジル (Brazil)</div><div class="menu-item">スウェーデン &amp; 北欧 (Sweden &amp; Nordic)</div><div class="menu-item">オーストラリア (Australia)</div><div class="menu-item">ポルトガル &amp; アンゴラ (Portugal &amp; Angola)</div><div class="menu-item">東アフリカ (Uganda &amp; Tanzania)</div><div class="menu-item">ペルー (Peru / Amazonian Psych)</div><div class="menu-item">韓国 (South Korea / K-Groove)</div><div class="menu-item">インド (India / Bollywood Psych)</div><div class="menu-item">フランス (France)</div><div class="menu-item">イタリア (Italy / Library &amp; Italo)</div><div class="menu-item">ルーマニア (Romania / Rominimal)</div><div class="menu-item">メキシコ (Mexico)</div><div class="menu-item">カーボベルデ (Cabo Verde)</div><div class="menu-item">レバノン &amp; パレスチナ (Levant / Dabke)</div><div class="menu-item">アルジェリア &amp; 北アフリカ (Algeria / Raï)</div><div class="menu-item">東南アジア (Thailand &amp; Indonesia)</div><div class="menu-item">世界5大都市コレクション (Fashion Week Runways)</div></div>
 </div>
 </div><div class="control-block">
 <div class="block-label"><span>2. STYLE / GENRE <small>/ ジャンル・サブジャンル</small></span><span class="status-pill" id="cat-badge" style="color: rgb(0, 210, 211); border: 1px solid rgb(0, 210, 211);">CLUB / DANCE / BASS</span></div>
 <div class="custom-wrapper" id="style-wrapper">
-<div class="custom-trigger" id="style-trigger" style="border-color: rgb(0, 210, 211);"><span class="dot" style="background-color:#00d2d3"></span> <span style="margin-left:6px; color:#ffffff;">3-Step (アフロテック / 変則キック連打)</span></div>
+<div class="custom-trigger" id="style-trigger">選んでください</div>
 <div class="custom-menu" id="style-options"><div class="menu-group-header" style="color: rgb(0, 210, 211);">■ CLUB / DANCE / BASS</div><div class="menu-item selected"><span class="dot" style="background-color:#00d2d3"></span><span>3-Step (アフロテック / 変則キック連打)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>プライベート・スクール (ジャズコード × ログドラム)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>スギジャ / クァンタム (歪みログドラム × ホイッスル)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>プレトリア：バカルディ (変則スネア × 打楽器)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>ダーバン：ゴム［Gqom］ (ダークミニマル × 重低音)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>サウスアフリカン・ディープハウス (ソウルフル4つ打ち)</span></div><div class="menu-group-header" style="color: rgb(254, 202, 87);">■ POP / KAYO / R&amp;B / SOUL</div><div class="menu-item"><span class="dot" style="background-color:#feca57"></span><span>80s バブルガム・ポップ (シンセ歌謡ディスコ)</span></div><div class="menu-group-header" style="color: rgb(29, 209, 161);">■ ROOTS / RARE GROOVE</div><div class="menu-item"><span class="dot" style="background-color:#1dd1a1"></span><span>タウンシップ・ジャズ / クウェラ (生ブラス)</span></div></div>
 </div>
 </div><div class="control-block">
@@ -1223,6 +1223,7 @@ body{
 <!-- パッドトリガー -->
 <div class="trigger-group">
 <button class="btn-fire" id="btn-copy">COPY PROMPT</button>
+<button class="btn-save-html" id="btn-new-dig">NEW DIG / CLEAR ALL</button>
 <button class="btn-save-html" id="btn-download">SAVE HTML</button><button class="btn-save-html" id="btn-code">COPY HTML CODE</button>
 </div>
 </div>
@@ -1589,8 +1590,8 @@ const COUNTRY_VAULT = {
   }
 };
 
-let currentCountry = "south_africa";
-let currentStyleIdx = 0;
+let currentCountry = null;
+let currentStyleIdx = null;
 
 const targetGrid = document.getElementById('target-grid');
 const targetBadge = document.getElementById('target-badge');
@@ -1729,26 +1730,28 @@ function buildCountryDropdown() {
     item.textContent = COUNTRY_VAULT[key].label;
     item.addEventListener('click', () => {
       currentCountry = key;
-      currentStyleIdx = 0;
+      currentStyleIdx = null;
       countryTrigger.textContent = COUNTRY_VAULT[key].label;
       countryOptions.classList.remove('open');
       buildStyleDropdown();
+      renderPrompt();
     });
     countryOptions.appendChild(item);
   });
-  countryTrigger.textContent = COUNTRY_VAULT[currentCountry].label;
+  countryTrigger.textContent = currentCountry ? COUNTRY_VAULT[currentCountry].label : '選んでください';
 }
-
 function buildStyleDropdown() {
   styleOptions.innerHTML = '';
+  styleTrigger.textContent = '選んでください';
+  styleTrigger.style.borderColor = '';
+  catBadge.textContent = '未選択';
+  catBadge.style.color = '';
+  catBadge.style.border = '';
+  if (!currentCountry) return;
+
   const styles = COUNTRY_VAULT[currentCountry].styles;
   const grouped = { club: [], soul: [], rock: [], roots: [], fashion: [], any: [] };
-
-  styles.forEach((s, idx) => {
-    if (grouped[s.cat]) {
-      grouped[s.cat].push({ ...s, idx });
-    }
-  });
+  styles.forEach((s, idx) => { if (grouped[s.cat]) grouped[s.cat].push({ ...s, idx }); });
 
   Object.keys(CATEGORIES).forEach(catKey => {
     const list = grouped[catKey];
@@ -1758,7 +1761,6 @@ function buildStyleDropdown() {
       header.style.color = CATEGORIES[catKey].hex;
       header.textContent = `■ ${CATEGORIES[catKey].label}`;
       styleOptions.appendChild(header);
-
       list.forEach(item => {
         const row = document.createElement('div');
         row.className = 'menu-item' + (item.idx === currentStyleIdx ? ' selected' : '');
@@ -1772,11 +1774,9 @@ function buildStyleDropdown() {
       });
     }
   });
-
-  updateSelection();
 }
-
 function updateSelection() {
+  if (!currentCountry || currentStyleIdx === null) { renderPrompt(); return; }
   const item = COUNTRY_VAULT[currentCountry].styles[currentStyleIdx];
   const cat = CATEGORIES[item.cat];
 
@@ -1792,6 +1792,10 @@ function updateSelection() {
 }
 
 function renderPrompt() {
+  if (!currentCountry || currentStyleIdx === null) {
+    outputView.textContent = "COUNTRY / STYLE を選んでください。";
+    return;
+  }
   const item = COUNTRY_VAULT[currentCountry].styles[currentStyleIdx];
   const bpm = Number(bpmInput.value || item.bpm);
   const phaseVal = phaseSelect.value;
@@ -1912,6 +1916,7 @@ countryTrigger.addEventListener('click', (e) => {
 });
 styleTrigger.addEventListener('click', (e) => {
   e.stopPropagation();
+  if (!currentCountry) { outputView.textContent = "先に COUNTRY を選んでください。"; return; }
   styleOptions.classList.toggle('open');
   countryOptions.classList.remove('open');
 });
@@ -1924,11 +1929,11 @@ phaseSelect.addEventListener('change', renderPrompt);
 bpmInput.addEventListener('input', renderPrompt);
 
 bpmIncBtn.addEventListener('click', () => {
-  bpmInput.value = parseInt(bpmInput.value, 10) + 5;
+  bpmInput.value = (parseInt(bpmInput.value, 10) || 100) + 5;
   renderPrompt();
 });
 bpmDecBtn.addEventListener('click', () => {
-  bpmInput.value = Math.max(40, parseInt(bpmInput.value, 10) - 5);
+  bpmInput.value = Math.max(40, (parseInt(bpmInput.value, 10) || 100) - 5);
   renderPrompt();
 });
 
@@ -2015,6 +2020,7 @@ document.getElementById('btn-code').addEventListener('click', async () => {
 
 buildCountryDropdown();
 buildStyleDropdown();
+renderPrompt();
 
 
 // === GEMINI RESULT IN v2 ===
@@ -2135,11 +2141,10 @@ clearGeminiBtn.addEventListener("click", () => {
 });
 
 try {
-  const savedGeminiResult = localStorage.getItem("diggersVaultGeminiResult");
-  if (savedGeminiResult) {
-    geminiResultInput.value = savedGeminiResult;
-    parseGeminiResult();
-  }
+  const isSpotifyCallback = new URLSearchParams(location.search).has("code");
+  const savedGeminiResult = isSpotifyCallback ? localStorage.getItem("diggersVaultGeminiResult") : "";
+  if (savedGeminiResult) { geminiResultInput.value = savedGeminiResult; parseGeminiResult(); }
+  else if (!isSpotifyCallback) { localStorage.removeItem("diggersVaultGeminiResult"); }
 } catch (_) {}
 
 
@@ -2515,7 +2520,42 @@ finalAutoBtn.addEventListener("click",finalAuto);
 finalClearBtn.addEventListener("click",()=>{finalCrate=[];finalSave();renderFinalCrate();});
 finalRedigBtn.addEventListener("click",finalCopyRedig);
 finalSendBtn.addEventListener("click",finalSendToSpotify);
-finalRestore(); renderFinalCrate();
+if (new URLSearchParams(location.search).has("code")) finalRestore();
+else { try { localStorage.removeItem("dv_final_crate"); } catch (_) {} finalCrate = []; }
+renderFinalCrate();
+
+function resetDigWorkspace() {
+  currentCountry = null;
+  currentStyleIdx = null;
+  currentTargetTag = ""; currentDepthType = ""; currentVocalTag = ""; selectedEras.clear();
+  isMutationOn = false; bpmRange = 5; currentMajorPresence = "NONE"; currentTasteBias = "BALANCED"; currentFreshness = "ANY";
+
+  document.querySelectorAll('.target-btn,.depth-btn,.vocal-btn,.era-btn,.major-btn,.smart-btn,.range-btn').forEach(b => b.classList.remove('active'));
+  targetGrid.querySelector('[data-target=""]')?.classList.add('active');
+  depthGrid.querySelector('[data-depth=""]')?.classList.add('active');
+  vocalGrid.querySelector('[data-vocal=""]')?.classList.add('active');
+  eraGrid.querySelector('[data-era="ALL"]')?.classList.add('active');
+  majorGrid.querySelector('[data-major="NONE"]')?.classList.add('active');
+  document.querySelector('[data-taste="BALANCED"]')?.classList.add('active');
+  document.querySelector('[data-fresh="ANY"]')?.classList.add('active');
+  document.querySelector('[data-range="5"]')?.classList.add('active');
+
+  targetBadge.textContent='ALL'; depthBadge.textContent='BALANCED'; vocalBadge.textContent='ALL'; eraBadge.textContent='ALL ERAS';
+  majorBadge.textContent='なし'; document.getElementById('taste-badge').textContent='BALANCED'; document.getElementById('fresh-badge').textContent='ANY';
+  phaseSelect.value='none'; phaseBadge.textContent='16-BANK ARC';
+  btnMutation.classList.remove('active'); mutationStatus.textContent='OFF (PURE LOCAL)'; mutationStatus.style.color='var(--text-dim)';
+  bpmInput.value='';
+  buildCountryDropdown(); buildStyleDropdown(); renderPrompt();
+
+  geminiResultInput.value=''; geminiCandidates=[]; candidateCrate.innerHTML=''; parseStatus.textContent='WAITING FOR GEMINI RESULT';
+  spotifyVerifyResults.innerHTML=''; finalVerifyResults=[]; window.spotifyVerifiedCandidates=[];
+  finalCrate=[]; finalSendStatusEl.textContent='';
+  try { localStorage.removeItem('diggersVaultGeminiResult'); localStorage.removeItem('dv_final_crate'); } catch (_) {}
+  renderFinalCrate();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('btn-new-dig').addEventListener('click', resetDigWorkspace);
 
 spotifyConnectBtn.addEventListener("click", spotifyConnect);
 spotifyVerifyBtn.addEventListener("click", spotifyVerifyCandidates);
@@ -2524,6 +2564,7 @@ spotifyDisconnectBtn.addEventListener("click", spotifyDisconnect);
 spotifyClientIdInput.value = localStorage.getItem("dv_spotify_client_id") || "";
 spotifyRedirectInput.value = localStorage.getItem("dv_spotify_redirect_uri") || "";
 setSpotifyConnectedUI();
+if (!new URLSearchParams(location.search).has("code")) resetDigWorkspace();
 spotifyHandleCallback().catch(err => {
   spotifyStatus.textContent = `SPOTIFY AUTH ERROR: ${err.message}`;
 });
