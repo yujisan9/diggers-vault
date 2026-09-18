@@ -1088,6 +1088,207 @@ body{
   .output-payload{font-size:.8rem!important}
 }
 
+
+
+/* =========================================================
+   UI SKIN v6.0 — SAMPLER / SP-STYLE HARDWARE STUDY
+   Visual layer only. No DIG / VERIFY / Spotify logic changed.
+   ========================================================= */
+:root{
+  --sp-body:#b9b7b0;
+  --sp-body-hi:#d2d0c8;
+  --sp-ink:#171717;
+  --sp-panel:#242424;
+  --sp-panel-2:#111;
+  --sp-line:#6e6d68;
+  --sp-orange:#ff6a13;
+  --sp-red:#e43b32;
+  --sp-yellow:#f4c430;
+  --sp-lcd:#b7d69b;
+  --sp-lcd-ink:#172115;
+}
+body{
+  background:#171717!important;
+  background-image:radial-gradient(#2c2c2c 1px,transparent 1px)!important;
+  background-size:4px 4px!important;
+  color:#161616!important;
+  padding:8px!important;
+}
+.vault-chassis{
+  max-width:480px!important;
+  background:linear-gradient(145deg,var(--sp-body-hi),#aaa8a1 52%,#92918c)!important;
+  border:2px solid #5e5d59!important;
+  border-radius:9px!important;
+  padding:13px 11px 18px!important;
+  box-shadow:0 3px 0 #55544f,0 18px 35px rgba(0,0,0,.65),inset 1px 1px 0 rgba(255,255,255,.75)!important;
+}
+.machine-header{
+  min-height:66px!important;
+  background:#c7c5be!important;
+  border:1px solid #7a7974!important;
+  border-left:9px solid var(--sp-orange)!important;
+  border-radius:4px!important;
+  padding:9px 10px!important;
+  margin-bottom:12px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7)!important;
+}
+.brand-title{
+  color:#111!important;
+  text-shadow:none!important;
+  font-family:Arial Black,Impact,sans-serif!important;
+  font-size:1.08rem!important;
+  letter-spacing:-.03em!important;
+  line-height:.95!important;
+  max-width:46%!important;
+}
+.machine-badge{
+  background:#1b1b1b!important;
+  color:#ddd!important;
+  border:2px inset #6c6b67!important;
+  border-radius:2px!important;
+  text-shadow:none!important;
+  padding:7px 9px!important;
+  font-size:.66rem!important;
+  letter-spacing:.12em!important;
+}
+.control-block{
+  background:#c5c3bc!important;
+  border:1px solid #777671!important;
+  border-radius:5px!important;
+  padding:10px!important;
+  margin-bottom:8px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65)!important;
+}
+.block-label{
+  color:#262626!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+  font-size:.68rem!important;
+  border-bottom:2px solid #333!important;
+  padding-bottom:5px!important;
+  margin-bottom:8px!important;
+}
+.status-pill{
+  background:#292929!important;
+  color:#f0f0ed!important;
+  border-radius:2px!important;
+  padding:3px 6px!important;
+}
+.target-btn,.depth-btn,.vocal-btn,.era-btn,.major-btn,.smart-btn,.range-btn,.bpm-btn,.btn-save-html{
+  background:linear-gradient(#383838,#202020)!important;
+  color:#ddd!important;
+  border:1px solid #080808!important;
+  border-bottom:3px solid #090909!important;
+  border-radius:4px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 1px rgba(0,0,0,.35)!important;
+  text-shadow:0 1px 0 #000!important;
+}
+.target-btn:active,.depth-btn:active,.vocal-btn:active,.era-btn:active,.major-btn:active,.smart-btn:active,.range-btn:active,.bpm-btn:active,.btn-save-html:active{
+  transform:translateY(2px)!important;
+  border-bottom-width:1px!important;
+}
+.target-btn.active,.depth-btn.active,.vocal-btn.active,.era-btn.active,.major-btn.active,.smart-btn.active,.range-btn.active{
+  background:linear-gradient(#ff7d26,#dc4c00)!important;
+  border-color:#7e2b00!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 0 2px rgba(255,106,19,.18)!important;
+}
+.custom-trigger,select,input[type="number"]{
+  background:#171717!important;
+  color:#f1f1ed!important;
+  border:2px inset #777!important;
+  border-radius:3px!important;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.75)!important;
+}
+.custom-trigger::after{color:var(--sp-orange)!important}
+.custom-menu{
+  background:#202020!important;
+  border:2px solid #777!important;
+  border-radius:3px!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.65)!important;
+}
+.menu-item{color:#e7e7e2!important;border-bottom:1px solid #3d3d3d!important}
+.menu-item.selected{background:#c9500b!important;color:#fff!important}
+.menu-group-header{background:#111!important;color:#f29b62!important}
+.bpm-control input[type="number"]{
+  background:var(--sp-lcd)!important;
+  color:var(--sp-lcd-ink)!important;
+  border:4px inset #6b6b64!important;
+  font-family:var(--font-mono)!important;
+  font-weight:900!important;
+  text-shadow:none!important;
+}
+.terminal-screen{
+  background:#10140f!important;
+  border:5px inset #696a63!important;
+  border-radius:3px!important;
+  box-shadow:inset 0 0 18px #000!important;
+}
+.screen-header{
+  background:#20251d!important;
+  border-bottom:1px solid #66735c!important;
+  color:#b9d99f!important;
+}
+.screen-title,.output-payload{
+  color:#b9d99f!important;
+  text-shadow:0 0 5px rgba(183,214,155,.18)!important;
+}
+.rec-dot,.dot{background:var(--sp-red)!important;box-shadow:0 0 7px rgba(228,59,50,.65)!important}
+.btn-fire{
+  background:linear-gradient(#ff7b24,#df4d00)!important;
+  color:#fff!important;
+  border:1px solid #7f2c00!important;
+  border-bottom:5px solid #772900!important;
+  border-radius:5px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 3px rgba(0,0,0,.35)!important;
+  text-shadow:0 1px 0 #6c2600!important;
+}
+.btn-fire:active{transform:translateY(3px)!important;border-bottom-width:2px!important}
+.trigger-group{
+  background:#aaa8a1!important;
+  border:1px solid #74736e!important;
+  padding:8px!important;
+  border-radius:4px!important;
+}
+.btn-save-html{
+  min-height:52px!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+}
+.panel{
+  background:#bdbbb4!important;
+  border:1px solid #74736e!important;
+  border-radius:5px!important;
+  color:#161616!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)!important;
+}
+.section-title{
+  color:#171717!important;
+  font-family:Arial Black,Impact,sans-serif!important;
+  letter-spacing:.04em!important;
+  text-shadow:none!important;
+  border-left:7px solid var(--sp-orange)!important;
+  padding-left:8px!important;
+}
+textarea{
+  background:#161616!important;
+  color:#cfe6c5!important;
+  border:3px inset #73736d!important;
+  border-radius:3px!important;
+  font-family:var(--font-mono)!important;
+}
+button{font-weight:800!important}
+.mutation-status{color:#222!important}
+.control-note{color:#444!important}
+@media(max-width:420px){
+  body{padding:4px!important}
+  .vault-chassis{border-radius:6px!important;padding:9px 8px 14px!important}
+  .control-block{padding:8px!important}
+  .brand-title{font-size:1rem!important}
+  .machine-badge{font-size:.6rem!important}
+}
 </style>
 </head>
 <body>
