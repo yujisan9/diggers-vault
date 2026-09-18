@@ -1295,7 +1295,7 @@ button{font-weight:800!important}
 <div class="vault-chassis">
 <div class="machine-header">
 <div class="brand-title">DIGGER'S VAULT PRO</div>
-<div class="machine-badge">16-BANK MK-VI · FINAL CRATE v5.1 · CLEAN START</div>
+<div class="machine-badge">SP-404 INSPIRED · DIG / SELECT / MIX</div>
 </div>
 <!-- 1. サンプリング・ターゲット指定 -->
 
@@ -1331,7 +1331,7 @@ button{font-weight:800!important}
 <div class="custom-menu" id="style-options"><div class="menu-group-header" style="color: rgb(0, 210, 211);">■ CLUB / DANCE / BASS</div><div class="menu-item selected"><span class="dot" style="background-color:#00d2d3"></span><span>3-Step (アフロテック / 変則キック連打)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>プライベート・スクール (ジャズコード × ログドラム)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>スギジャ / クァンタム (歪みログドラム × ホイッスル)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>プレトリア：バカルディ (変則スネア × 打楽器)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>ダーバン：ゴム［Gqom］ (ダークミニマル × 重低音)</span></div><div class="menu-item"><span class="dot" style="background-color:#00d2d3"></span><span>サウスアフリカン・ディープハウス (ソウルフル4つ打ち)</span></div><div class="menu-group-header" style="color: rgb(254, 202, 87);">■ POP / KAYO / R&amp;B / SOUL</div><div class="menu-item"><span class="dot" style="background-color:#feca57"></span><span>80s バブルガム・ポップ (シンセ歌謡ディスコ)</span></div><div class="menu-group-header" style="color: rgb(29, 209, 161);">■ ROOTS / RARE GROOVE</div><div class="menu-item"><span class="dot" style="background-color:#1dd1a1"></span><span>タウンシップ・ジャズ / クウェラ (生ブラス)</span></div></div>
 </div>
 </div><div class="control-block">
-<div class="block-label"><span>3. BPM / 16 TRACKS</span></div>
+<div class="block-label"><span>3. BPM / テンポ（表示のみ）</span></div>
 <div class="bpm-control bpm-display-only">
 <button class="bpm-btn bpm-hidden-control" id="bpm-dec" type="button" aria-hidden="true" tabindex="-1">-5</button>
 <div class="bpm-lcd"><input id="bpm-input" max="220" min="40" step="1" type="number" readonly aria-label="BPM display"/><span>BPM</span></div>
@@ -1419,20 +1419,20 @@ button{font-weight:800!important}
 </button>
 </div><div class="terminal-screen">
 <div class="screen-header">
-<span class="screen-title">SPOTIFY AI / DIRECT COMMAND</span>
+<span class="screen-title">CHATGPT / DIRECT COMMAND</span>
 <span class="rec-dot"></span>
 </div>
-<div class="output-payload" id="output-view">GEMINI DIG COMMAND READY.</div>
+<div class="output-payload" id="output-view">COUNTRY / STYLE を選んでください。</div>
 </div>
 <!-- パッドトリガー -->
 <div class="trigger-group">
-<button class="btn-fire" id="btn-copy">COPY PROMPT</button>
+<button class="btn-fire" id="btn-copy">CHATGPT → SPOTIFY</button>
 <button class="btn-save-html" id="btn-new-dig">NEW DIG / CLEAR ALL</button>
 <button class="btn-save-html" id="btn-download">SAVE HTML</button><button class="btn-save-html" id="btn-code">COPY HTML CODE</button>
 </div>
 </div>
 
-<section class="panel gemini-result-panel" id="gemini-result-panel" style="margin-top:16px;">
+<section class="panel gemini-result-panel legacy-panel" id="gemini-result-panel" style="margin-top:16px;">
   <div class="section-title">GEMINI RESULT IN</div>
   <textarea id="gemini-result-input" rows="10" spellcheck="false"
     placeholder="Geminiの結果をここに貼り付け&#10;Artist - Track&#10;Artist - Track"
@@ -2003,105 +2003,24 @@ function renderPrompt() {
   const item = COUNTRY_VAULT[currentCountry].styles[currentStyleIdx];
   const bpm = Number(bpmInput.value || item.bpm);
   const phaseVal = phaseSelect.value;
-  const rules = [];
-
-  // GEMINI DIGGER ENGINE v1
-  // Gemini-origin COUNTRY_VAULT is source data only and is never rewritten here.
-  // Goal: broad discovery first, then deep digging inside the selected musical area.
-  let opening = `Deep-research real, verifiable tracks for ${item.tags}`;
-
-  // Preserve Gemini-origin discovery metadata as research context.
-  const context = [];
-  if (item.bias) context.push(item.bias);
-  if (isMutationOn && item.mut) context.push(item.mut);
-  if (context.length) opening += `, using ${context.join(" and ")} as scene context`;
-  opening += ".";
-  rules.push(opening);
-
-  if (currentTargetTag) {
-    const targetMap = {
-      "open live acoustic drum break solo, no music intro": "Prioritize tracks with prominent open drum breaks.",
-      "isolated drum one-shot": "Prioritize tracks with distinctive drum one-shots.",
-      "rhodes chord progression loop": "Prioritize tracks with prominent Rhodes or chord loops.",
-      "unfiltered dry bassline loop": "Prioritize tracks with prominent dry basslines.",
-      "vocal phrase chop": "Prioritize tracks with prominent vocal chops."
-    };
-    rules.push(targetMap[currentTargetTag] || `Prioritize tracks featuring ${currentTargetTag}.`);
-  }
-
-  if (currentVocalTag) {
-    const vocalMap = {
-      "male vocalists": "Prefer male vocals.",
-      "female vocalists": "Prefer female vocals.",
-      "instrumental only, no vocals": "Use instrumental or lyric-free tracks."
-    };
-    rules.push(vocalMap[currentVocalTag] || `Prefer ${currentVocalTag}.`);
-  }
-
-  if (selectedEras.size > 0) {
-    const eraMap = {"60s":"the '60s","70s":"the '70s","80s":"the '80s","90s":"the '90s","2000s":"the '00s","modern":"current releases"};
-    const eras = Array.from(selectedEras).map(e => eraMap[e] || e);
-    rules.push(`Focus on music from ${eras.join(" and ")}.`);
-  }
-
-  // CRATE DEPTH and MAJOR PRESENCE describe digging direction, not hard catalog filters.
-  if (currentMajorPresence === "DEKAMORI") {
-    rules.push("Focus on era-defining, iconic and widely recognized tracks within this exact scene.");
-  } else if (currentMajorPresence === "MAIN") {
-    rules.push("Use recognizable scene essentials as the backbone, with deeper cuts around them.");
-  } else {
-    if (currentDepthType === "MAJOR") {
-      rules.push("Favor established scene essentials.");
-    } else if (currentDepthType === "UNDERGROUND") {
-      rules.push("Dig into deeper underground cuts.");
-    } else if (currentDepthType === "OBSCURE") {
-      rules.push("Dig for hidden gems, obscure releases and deeper cuts.");
-    }
-
-    if (currentMajorPresence === "ACCENT") {
-      rules.push("Add a few recognizable scene anchors.");
-    } else if (currentMajorPresence === "MIX") {
-      rules.push("Balance recognizable scene tracks with deeper cuts.");
-    }
-  }
-
-  // Taste direction is phrased for Gemini research, not Spotify personalization.
-  if (currentTasteBias === "MY") {
-    rules.push("Stay close to the selected musical direction rather than forcing novelty.");
-  } else if (currentTasteBias === "BALANCED") {
-    rules.push("Balance familiar scene references with discoveries.");
-  } else if (currentTasteBias === "NEW") {
-    rules.push("Prioritize discoveries beyond the obvious names in this scene.");
-  }
-
-  if (currentFreshness === "LESS") {
-    rules.push("Prefer less obvious and less repeatedly surfaced selections.");
-  } else if (currentFreshness === "UNHEARD") {
-    rules.push("Prioritize unfamiliar discoveries and avoid the most obvious staples.");
-  }
-
-  // BPM is intentionally soft: the selected subgenre remains the primary musical constraint.
-  if (bpmRange === 3) {
-    rules.push(`Use ${bpm} BPM as a tight tempo reference, but do not reject an authentic track solely for BPM.`);
-  } else if (bpmRange === 8) {
-    rules.push(`Use ${bpm} BPM as a loose tempo reference; subgenre authenticity comes first.`);
-  } else {
-    rules.push(`Use ${bpm} BPM as a soft tempo reference; subgenre authenticity comes first.`);
-  }
-
-  if (phaseVal === "none") rules.push("Favor tracks that can form a warm-up to peak to comedown DJ arc.");
-  else if (phaseVal === "warmup") rules.push("Favor a steady warm-up role.");
-  else if (phaseVal === "buildup") rules.push("Favor tracks that build energy gradually.");
-  else if (phaseVal === "peak") rules.push("Favor peak-time energy.");
-  else if (phaseVal === "afterhours") rules.push("Favor a late-night after-hours role.");
-
-  // Return a candidate crate for later Spotify verification.
-  rules.push("Find 24 strong candidate tracks. Use each artist once.");
-  rules.push("Verify that every Artist - Track pairing is real. Return only Artist - Track, one per line.");
-
-  const phaseLabels = { none: "16-BANK ARC", warmup: "WARM UP", buildup: "BUILD UP", peak: "PEAK TIME", afterhours: "AFTERHOURS" };
-  phaseBadge.textContent = phaseLabels[phaseVal];
-  outputView.textContent = rules.join(" ");
+  const p = [
+    "Create and save a 24-track Spotify playlist",
+    `style:${item.tags}`,
+    `BPM:${bpm}±${bpmRange} STRICT TOP PRIORITY`
+  ];
+  if (item.bias) p.push(`scene:${item.bias}`);
+  if (currentTargetTag) p.push(`target:${currentTargetTag}`);
+  if (currentDepthType) p.push(`depth:${currentDepthType}`);
+  if (currentVocalTag) p.push(`vocal:${currentVocalTag}`);
+  if (selectedEras.size) p.push(`era:${Array.from(selectedEras).join("+")}`);
+  if (phaseVal && phaseVal !== "none") p.push(`phase:${phaseVal}`);
+  if (currentMajorPresence && currentMajorPresence !== "NONE") p.push(`major:${currentMajorPresence}`);
+  if (currentTasteBias && currentTasteBias !== "BALANCED") p.push(`taste:${currentTasteBias}`);
+  if (currentFreshness && currentFreshness !== "ANY") p.push(`freshness:${currentFreshness}`);
+  if (isMutationOn && item.mut) p.push(`mutation:${item.mut}`);
+  p.push("real Spotify tracks only", "one track per artist", "DJ-mixable inside BPM range",
+         "use connected Spotify and create the playlist; do not only return text");
+  outputView.textContent = p.join(" | ");
 }
 // BPMレンジ：DJで繋ぎやすい近似テンポを優先（素材・ジャンル範囲は変更しない）
 document.querySelectorAll('.range-btn').forEach(btn => {
@@ -2149,26 +2068,25 @@ bpmDecBtn.addEventListener('click', () => {
   renderPrompt();
 });
 
-// コピー処理
-btnCopy.addEventListener('click', () => {
+// CHATGPTへ送る。Androidでは共有シートからChatGPTを選択。
+btnCopy.addEventListener('click', async () => {
+  if (!currentCountry || currentStyleIdx === null) return;
   const text = outputView.textContent;
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', '');
-  textarea.style.position = 'absolute';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-  textarea.setSelectionRange(0, 99999);
-  document.execCommand('copy');
-  document.body.removeChild(textarea);
-
-  btnCopy.textContent = "COPIED TO CLIPBOARD!";
-  btnCopy.style.background = "linear-gradient(180deg, #2ed573 0%, #26af5f 100%)";
-  setTimeout(() => {
-    btnCopy.textContent = "プロンプトをコピー";
-    btnCopy.style.background = "linear-gradient(180deg, #ff5252 0%, #d63031 100%)";
-  }, 1000);
+  const old = btnCopy.textContent;
+  try {
+    if (navigator.share) {
+      await navigator.share({title:"DIGGER'S VAULT PRO", text});
+      btnCopy.textContent = "SHARED";
+    } else {
+      await navigator.clipboard.writeText(text);
+      window.open("https://chatgpt.com/","_blank","noopener");
+      btnCopy.textContent = "COPIED · OPEN CHATGPT";
+    }
+  } catch(e) {
+    if (e && e.name === "AbortError") return;
+    try { await navigator.clipboard.writeText(text); btnCopy.textContent="COPIED"; } catch(_) {}
+  }
+  setTimeout(()=>btnCopy.textContent=old,1600);
 });
 
 // HTML自己保存
@@ -2178,7 +2096,7 @@ btnDownload.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'diggers_vault_mk6_gemini_digger_engine_v1.html';
+  a.download = 'DIGGERS_VAULT_PRO_SP404_CHATGPT_COMPLETE_v6.html';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2784,4 +2702,135 @@ spotifyHandleCallback().catch(err => {
 </script>
 
 <div id="offlineStandaloneBadge" style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:7px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(7,10,14,.88);backdrop-filter:blur(10px);font:600 10px/1.1 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.12em;color:#aeb8c5;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.28)">SPOTIFY DIRECT / OFFLINE</div>
+
+<style id="sp404-final-reference">
+:root{--orange:#ff5b13;--lcd:#91e77d;--ink:#0d1011;--panel:#1d2225;--edge:#07090a}
+html{background:#080a0b}
+body{background:radial-gradient(circle at 50% 0,#202629 0,#0a0d0f 55%,#050607 100%)!important;padding:10px!important}
+.vault-chassis{max-width:1120px!important;border:3px solid #080a0b!important;border-radius:24px!important;padding:18px!important;
+background:linear-gradient(135deg,#343a3e,#171b1e 48%,#262c30)!important;
+box-shadow:inset 0 0 0 2px #555d61,inset 0 0 40px #000,0 18px 50px #000!important}
+.machine-header{border:0!important;background:transparent!important;padding:4px 22px 16px!important}
+.brand-title{font-size:2rem!important;letter-spacing:.04em!important;color:#f0f0ed!important;text-shadow:0 2px #707579}
+.machine-badge{color:#c9ced0!important;letter-spacing:.12em!important}
+.sp404-lcd-head{margin:0 55px 18px;background:#0d160e;border:4px solid #080a09;border-radius:14px;min-height:112px;
+box-shadow:inset 0 0 28px #000,0 0 0 2px #394043;display:flex;align-items:center;justify-content:space-between;padding:18px 28px}
+.sp404-lcd-head .ready{font:800 2rem/1.15 var(--font-mono);color:var(--lcd);text-shadow:0 0 8px rgba(145,231,125,.3)}
+.sp404-lcd-head .sub{font:700 1rem/1.5 var(--font-mono);color:var(--lcd)}
+.sp404-lcd-head .ver{border-left:1px solid #263328;padding-left:22px;color:var(--lcd);font:800 1.25rem var(--font-mono)}
+.sp404-grid{display:grid;grid-template-columns:1.15fr .92fr;gap:10px}
+.sp404-left,.sp404-right{display:flex;flex-direction:column;gap:8px}
+.control-block,.terminal-screen,.sp-right-card{margin:0!important;border-radius:9px!important;border:1px solid #080a0b!important;background:linear-gradient(135deg,#252a2e,#15191c)!important;
+box-shadow:inset 0 1px #495055,0 2px 0 #070809!important;padding:11px 13px!important}
+.block-label{color:#b9c7d3!important;letter-spacing:.06em!important}
+.block-label:before,.sp-num{color:var(--orange);font:900 1.55rem var(--font-mono);margin-right:12px}
+.control-block[data-spnum] .block-label:before{content:attr(data-spnum)}
+.status-pill,.control-note{display:none!important}
+.custom-trigger,.sp-drawer-trigger{min-height:48px!important;background:linear-gradient(#25292c,#111416)!important;border:1px solid #070809!important;border-radius:6px!important;
+box-shadow:inset 0 1px #555b5f,0 2px #08090a!important;color:#f0f0ed!important;font-weight:800!important;padding:0 15px!important;display:flex!important;align-items:center!important}
+.custom-trigger:after,.sp-drawer-trigger:after{content:"▼";margin-left:auto;color:var(--orange);font-size:1.15rem}
+.custom-menu,.sp-drawer-menu{background:#111416!important;border:1px solid #51575b!important;z-index:1000!important}
+.target-button-grid{grid-template-columns:repeat(3,1fr)!important}
+.depth-button-grid{grid-template-columns:repeat(4,1fr)!important}
+.three-button-grid{grid-template-columns:repeat(3,1fr)!important}
+.target-btn,.depth-btn,.smart-btn,.range-btn{min-height:48px!important}
+.bpm-display-only{grid-template-columns:1fr!important}.bpm-range-wrap{display:none!important}.bpm-lcd{max-width:210px;margin-left:auto}
+.legacy-panel{display:none!important}
+.terminal-screen{min-height:150px!important}
+.screen-title{color:#c5d2dc!important}.output-payload{color:var(--lcd)!important}
+.trigger-group{display:none!important}
+.sp-right-card h3{margin:0 0 10px;color:#c5d2dc;font:800 .9rem var(--font-mono);letter-spacing:.07em}
+.sp-right-card .num{color:var(--orange);font:900 1.6rem var(--font-mono);margin-right:10px}
+.sp-action{width:100%;min-height:58px;border-radius:7px;border:1px solid #08090a;background:linear-gradient(#3b3f42,#17191b);color:#f2f2ef;
+box-shadow:inset 0 1px #666c70,0 3px #08090a;font:800 .95rem var(--font-mono);letter-spacing:.06em}
+.sp-action.orange{min-height:112px;background:linear-gradient(#ff742d,#ed4d05);color:#fff;font-size:1.45rem;box-shadow:inset 0 1px #ffb080,0 4px #641d00}
+.sp-online{color:var(--lcd);font:800 .75rem var(--font-mono);float:right}
+.sp-final-list{min-height:80px;background:#0d130e;border:2px solid #080a09;border-radius:8px;color:var(--lcd);padding:12px;font:700 .8rem/1.5 var(--font-mono)}
+.sp-footer{display:flex;justify-content:space-between;color:#879096;font:700 .7rem var(--font-mono);letter-spacing:.12em;padding:12px 8px 0}
+.sp-drawer{position:relative}.sp-drawer-menu{display:none;position:absolute;left:0;right:0;top:52px;max-height:260px;overflow:auto;border-radius:7px;padding:6px}
+.sp-drawer.open .sp-drawer-menu{display:block}.sp-drawer-menu button{display:block;width:100%;text-align:left;padding:12px;background:#171b1e;color:#eee;border:0;border-bottom:1px solid #2f3539}
+.sp-drawer-menu button.active{color:#111;background:#ff6420;font-weight:900}
+#sp-range-display{display:flex;gap:8px;align-items:center}.range-box{background:#0c1210;color:#cbd6d0;border:1px solid #060807;border-radius:6px;padding:9px 15px;font:800 1rem var(--font-mono)}
+@media(max-width:760px){.sp404-grid{grid-template-columns:1fr}.sp404-lcd-head{margin:0 0 12px}.brand-title{font-size:1.45rem!important}.sp404-lcd-head .ready{font-size:1.5rem}.target-button-grid{grid-template-columns:repeat(3,1fr)!important}.depth-button-grid{grid-template-columns:repeat(2,1fr)!important}}
+</style>
+<script id="sp404-final-controller">
+document.addEventListener("DOMContentLoaded",()=>{
+  const chassis=document.querySelector(".vault-chassis");
+  const header=document.querySelector(".machine-header");
+  const controls=[...chassis.querySelectorAll(":scope > .control-block")];
+  const terminal=chassis.querySelector(":scope > .terminal-screen");
+
+  const lcd=document.createElement("div");
+  lcd.className="sp404-lcd-head";
+  lcd.innerHTML='<div><div class="ready">READY...</div><div class="sub">SELECT PARAMETERS & DIG ▶</div></div><div class="ver">v6.0<br><small>CHATGPT<br>SPOTIFY</small></div>';
+  header.after(lcd);
+
+  const grid=document.createElement("div"); grid.className="sp404-grid";
+  const left=document.createElement("div"); left.className="sp404-left";
+  const right=document.createElement("div"); right.className="sp404-right";
+  grid.append(left,right); lcd.after(grid);
+
+  // Existing controls: country, style, BPM, target, depth, vocal, era, phase, major, taste, freshness, mutation
+  controls.forEach((el,i)=>{ el.dataset.spnum=String(i+1).padStart(2,"0"); left.appendChild(el); });
+
+  function makeDrawer(block, selector, labeler){
+    const source=block.querySelector(selector); if(!source) return;
+    const buttons=[...source.querySelectorAll("button")];
+    if(!buttons.length) return;
+    const wrap=document.createElement("div"); wrap.className="sp-drawer";
+    const trig=document.createElement("button"); trig.type="button"; trig.className="sp-drawer-trigger";
+    const menu=document.createElement("div"); menu.className="sp-drawer-menu";
+    const sync=()=>{const a=buttons.find(b=>b.classList.contains("active"))||buttons[0];trig.textContent=labeler?labeler(a):a.textContent.trim();}
+    buttons.forEach(b=>{const x=document.createElement("button");x.type="button";x.textContent=b.textContent.trim();x.onclick=()=>{b.click();wrap.classList.remove("open");sync();};menu.appendChild(x);});
+    trig.onclick=()=>wrap.classList.toggle("open"); wrap.append(trig,menu); source.style.display="none"; source.after(wrap); sync();
+  }
+  // Many-choice / menu-style items become drawers, matching the reference.
+  makeDrawer(controls[5],"#vocal-grid");
+  makeDrawer(controls[6],"#era-grid");
+  makeDrawer(controls[7],"#phase-grid");
+  makeDrawer(controls[8],"#major-grid");
+  makeDrawer(controls[9],"#taste-grid");
+
+  // BPM range gets a compact hardware display + ±3/5/8 selector.
+  const bpmBlock=controls[2], range=bpmBlock.querySelector("#bpm-range-wrap");
+  if(range){ range.style.display="flex"; range.style.marginTop="8px"; range.querySelector(".bpm-range-label").textContent="BPM RANGE"; }
+
+  // Right side: ChatGPT operation
+  const card14=document.createElement("div"); card14.className="sp-right-card";
+  card14.innerHTML='<h3><span class="num">13</span>TASTE BIAS / 嗜好バイアス</h3>';
+  const taste=controls[9]; right.appendChild(taste); taste.dataset.spnum="13";
+
+  const cmd=document.createElement("div"); cmd.className="sp-right-card";
+  cmd.innerHTML='<h3><span class="num">14</span>CHATGPT OPERATION</h3><div class="sp-final-list">選択条件を短い命令へ変換し、ChatGPTへ渡します。選曲・Spotifyプレイリスト作成はChatGPTに任せます。</div>';
+  right.appendChild(cmd);
+
+  const direct=document.createElement("div"); direct.className="sp-right-card";
+  direct.innerHTML='<h3><span class="num">15</span>CHATGPT → SPOTIFY <span class="sp-online">● CONNECTED</span></h3>';
+  direct.appendChild(terminal); right.appendChild(direct);
+
+  const verify=document.createElement("div"); verify.className="sp-right-card";
+  verify.innerHTML='<h3><span class="num">16</span>SPOTIFY / CONNECTED APP</h3><button class="sp-action" id="sp-share">CHATGPTへ送る ↗</button>';
+  right.appendChild(verify);
+
+  const final=document.createElement("div"); final.className="sp-right-card";
+  final.innerHTML='<h3><span class="num">17</span>FINAL CRATE / 最終プレイリスト</h3><div class="sp-final-list">DIG NOW → ChatGPTで24曲選曲 → Spotifyへ保存</div><button class="sp-action" id="sp-redig">NEW DIG / CLEAR ALL</button><button class="sp-action" id="sp-save">SAVE HTML</button><button class="sp-action orange" id="sp-dig">▶ DIG NOW</button>';
+  right.appendChild(final);
+
+  document.getElementById("sp-share").onclick=()=>document.getElementById("btn-copy").click();
+  document.getElementById("sp-dig").onclick=()=>document.getElementById("btn-copy").click();
+  document.getElementById("sp-redig").onclick=()=>document.getElementById("btn-new-dig").click();
+  document.getElementById("sp-save").onclick=()=>document.getElementById("btn-download").click();
+
+  // Correct left numbering after moving taste to right.
+  const leftItems=[...left.querySelectorAll(":scope > .control-block")];
+  leftItems.forEach((el,i)=>el.dataset.spnum=String(i+1).padStart(2,"0"));
+  // freshness/mutation become 11/12; taste is 13 on right.
+  controls[10].dataset.spnum="11"; controls[11].dataset.spnum="12";
+
+  const foot=document.createElement("div"); foot.className="sp-footer";
+  foot.innerHTML="<span>BEATS · SAMPLES · DISCOVERY · FOR LIFE</span><span>DIGGER'S VAULT PRO · v6.0</span>";
+  grid.after(foot);
+});
+</script>
+
 </body></html>
